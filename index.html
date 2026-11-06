@@ -1,0 +1,3602 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BESTOBEAM - Technical Specification & Solution</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+    <style>
+        /* [Design Tokens] */
+        :root {
+            --color-primary: #0f63a8;
+            --color-primary-dark: #0a426f;
+            --color-accent: #1b9aaa;
+            --color-warm: #f59f3a;
+            --color-danger: #e4573d;
+            --color-success: #35a867;
+            --color-canvas: #f6f8fb;
+            --color-surface: #ffffff;
+            --color-surface-muted: #eef3f8;
+            --color-surface-tile-1: #25282d;
+            --color-canvas-parchment: #f3f6fa;
+            --color-text-dark: #17202a;
+            --color-text-secondary: #657384;
+            --color-border: #dbe4ee;
+            --color-nav-bg: #111111;
+            --spacing-section: 80px;
+            --spacing-element: 40px;
+            --nav-height-global: 50px;
+            --nav-height-tabs: 58px;
+            /* 그림 폭 단계: 본문(1036px)보다 좁게 두어 글과 그림의 균형을 잡는다 */
+            --fig-full: 860px;
+            --fig-narrow: 640px;
+            --fig-portrait: 460px;
+            --grid-gap: 20px;
+            --ls-headline: 0;
+            --ls-headline-tight: 0;
+            --shadow-card: 0 18px 50px rgba(18, 31, 46, 0.08);
+            --shadow-card-hover: 0 24px 70px rgba(18, 31, 46, 0.14);
+            --shadow-product: 0 22px 55px rgba(18, 31, 46, 0.14);
+            --rounded-pill: 980px;
+        }
+
+        /* [Base Styles] */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        body {
+            font-family: 'Inter', 'Noto Sans KR', 'Apple SD Gothic Neo', -apple-system, sans-serif;
+            background:
+                linear-gradient(180deg, #ffffff 0, var(--color-canvas) 360px, #ffffff 100%);
+            color: var(--color-text-dark);
+            line-height: 1.55;
+            overflow-x: hidden;
+        }
+
+        strong {
+            color: var(--color-primary-dark);
+            font-weight: 700;
+        }
+
+        /* img에 width/height 속성이 있어도 CSS 폭에 맞춰 비율을 유지시킨다.
+           (더 구체적인 선택자에서 height를 지정한 이미지는 영향받지 않음) */
+        img {
+            height: auto;
+        }
+
+        /* [Navigation] */
+        .global-nav {
+            position: fixed;
+            top: 0;
+            width: 100%;
+            height: var(--nav-height-global);
+            background: var(--color-nav-bg);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+            z-index: 10000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .global-nav .nav-container {
+            width: 100%;
+            max-width: 980px;
+            padding: 0 22px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+        }
+
+        .global-nav .logo {
+            color: #fff;
+            font-size: 16px;
+            font-weight: 700;
+            letter-spacing: 0.08em;
+            text-decoration: none;
+        }
+
+        .global-nav .left-button {
+            position: absolute;
+            left: 22px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .global-nav .btn-design {
+            background: rgba(255, 255, 255, 0.08);
+            cursor: pointer;
+            font-size: 12.5px;
+            color: #fff;
+            text-decoration: none;
+            padding: 5px 12px;
+            border: 1px solid rgba(255, 255, 255, 0.18);
+            border-radius: 980px;
+            transition: all 0.3s;
+            font-family: inherit;
+        }
+
+        .global-nav .btn-design:hover {
+            background: #fff;
+            color: #000;
+            transform: translateY(-1px);
+        }
+
+        .global-nav .right-logo {
+            position: absolute;
+            right: 22px;
+            height: 18px;
+            display: flex;
+            align-items: center;
+        }
+
+        .global-nav .right-logo img {
+            height: 100%;
+            width: auto;
+        }
+
+        .global-nav .nav-tools {
+            position: absolute;
+            right: 22px;
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .global-nav .nav-tools .right-logo {
+            position: relative;
+            right: auto;
+            height: 18px;
+        }
+
+        .tab-nav {
+            position: fixed;
+            top: var(--nav-height-global);
+            width: 100%;
+            height: var(--nav-height-tabs);
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid rgba(15, 99, 168, 0.12);
+            box-shadow: 0 10px 30px rgba(18, 31, 46, 0.04);
+            z-index: 9999;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .tab-wrapper {
+            width: 100%;
+            max-width: 1200px;
+            padding: 0 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+        }
+
+        .tab-container {
+            display: flex;
+            gap: 5px;
+            flex: 1;
+            align-items: center;
+            justify-content: center;
+            /* 좁은 화면에서 넘칠 때 잘리지 않고 스크롤되도록 */
+            justify-content: safe center;
+            overflow-x: auto;
+            scrollbar-width: none;
+        }
+
+        /* [다른 제품 링크] 탭과 구분되도록 별도 디자인 */
+        .tab-divider {
+            flex: 0 0 auto;
+            width: 1px;
+            height: 16px;
+            margin: 0 3px;
+            background: var(--color-border);
+        }
+
+        .product-link {
+            flex: 0 0 auto;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            padding: 7px 13px;
+            border: 1px solid rgba(15, 99, 168, 0.32);
+            border-radius: var(--rounded-pill);
+            background: rgba(15, 99, 168, 0.07);
+            color: var(--color-primary);
+            font-size: 13px;
+            font-weight: 600;
+            text-decoration: none;
+            white-space: nowrap;
+            font-family: inherit;
+            transition: background 0.25s ease, color 0.25s ease, border-color 0.25s ease;
+        }
+
+        .product-link::after {
+            content: '→';
+            font-size: 11px;
+            line-height: 1;
+            opacity: 0.75;
+        }
+
+        .product-link:hover {
+            background: var(--color-primary);
+            border-color: var(--color-primary);
+            color: #fff;
+        }
+
+        .product-link:hover::after {
+            opacity: 1;
+        }
+
+        .tab-container::-webkit-scrollbar {
+            display: none;
+        }
+
+        .mobile-menu-toggle {
+            display: none;
+            align-items: center;
+            justify-content: space-between;
+            width: 100%;
+            min-height: 38px;
+            padding: 8px 14px;
+            border: 1px solid rgba(15, 99, 168, 0.16);
+            border-radius: 14px;
+            background: #fff;
+            color: var(--color-primary-dark);
+            font: inherit;
+            font-size: 14px;
+            font-weight: 700;
+            cursor: pointer;
+            box-shadow: 0 8px 22px rgba(18, 31, 46, 0.06);
+        }
+
+        .hamburger-lines {
+            width: 18px;
+            height: 12px;
+            display: inline-flex;
+            flex-direction: column;
+            justify-content: space-between;
+            margin-left: 12px;
+        }
+
+        .hamburger-lines span {
+            display: block;
+            height: 2px;
+            border-radius: var(--rounded-pill);
+            background: var(--color-primary-dark);
+            transition: transform 0.2s ease, opacity 0.2s ease;
+        }
+
+        .tab-nav.menu-open .hamburger-lines span:nth-child(1) {
+            transform: translateY(5px) rotate(45deg);
+        }
+
+        .tab-nav.menu-open .hamburger-lines span:nth-child(2) {
+            opacity: 0;
+        }
+
+        .tab-nav.menu-open .hamburger-lines span:nth-child(3) {
+            transform: translateY(-5px) rotate(-45deg);
+        }
+
+        .lang-selector {
+            display: flex;
+            gap: 6px;
+        }
+
+        .lang-btn {
+            font-size: 11.5px;
+            color: #fff;
+            background: none;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            padding: 3px 8px;
+            border-radius: 980px;
+            cursor: pointer;
+            opacity: 0.6;
+            transition: all 0.2s;
+            font-weight: 500;
+            font-family: inherit;
+        }
+
+        .lang-btn.active {
+            opacity: 1;
+            border-color: #fff;
+            font-weight: 700;
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .lang-btn:hover {
+            opacity: 1;
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .tab-link {
+            background: none;
+            border: none;
+            padding: 8px 11px;
+            border-radius: var(--rounded-pill);
+            font-size: 14px;
+            color: var(--color-text-dark);
+            text-decoration: none;
+            opacity: 0.68;
+            cursor: pointer;
+            transition: background 0.25s ease, color 0.25s ease, opacity 0.25s ease;
+            white-space: nowrap;
+            font-family: inherit;
+        }
+
+        .tab-link.active {
+            opacity: 1;
+            font-weight: 600;
+            color: var(--color-primary-dark);
+            background: rgba(15, 99, 168, 0.1);
+        }
+
+        .tab-link:hover {
+            opacity: 1;
+            background: rgba(15, 99, 168, 0.07);
+        }
+
+        /* [Content Layout] */
+        .page-content {
+            display: none;
+            padding-top: calc(var(--nav-height-global) + var(--nav-height-tabs) + var(--spacing-section));
+            min-height: 100vh;
+            padding-bottom: var(--spacing-section);
+        }
+
+        .page-content.active {
+            display: block;
+        }
+
+        .container {
+            max-width: 1080px;
+            margin: 0 auto;
+            padding: 0 22px;
+        }
+
+        /* [Typography] */
+        .section-headline {
+            position: relative;
+            max-width: 880px;
+            font-size: 44px;
+            font-weight: 700;
+            line-height: 1.14;
+            letter-spacing: var(--ls-headline-tight);
+            margin-bottom: 14px;
+        }
+
+        .section-subhead {
+            max-width: 780px;
+            font-size: 19px;
+            color: var(--color-text-secondary);
+            margin-bottom: var(--spacing-element);
+        }
+
+        .technical-box {
+            position: relative;
+            background: var(--color-surface);
+            padding: 34px;
+            border-radius: 18px;
+            border: 1px solid var(--color-border);
+            box-shadow: var(--shadow-card);
+            margin-top: var(--spacing-element);
+            overflow: hidden;
+        }
+
+        .technical-box::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, var(--color-primary), var(--color-accent));
+        }
+
+        .technical-box h3 {
+            font-size: 23px;
+            font-weight: 700;
+            line-height: 1.32;
+            margin-bottom: 15px;
+        }
+
+        .technical-box p {
+            font-size: 16px;
+            color: #424245;
+            margin-bottom: 10px;
+        }
+
+        .technical-box ul {
+            margin-left: 0;
+            font-size: 16px;
+            color: #424245;
+            display: grid;
+            gap: 10px;
+            list-style: none;
+        }
+
+        .technical-box ul:not([style*="list-style: none"]) li {
+            position: relative;
+            padding: 13px 15px 13px 34px;
+            background: var(--color-surface-muted);
+            border: 1px solid rgba(15, 99, 168, 0.08);
+            border-radius: 12px;
+        }
+
+        .technical-box ul:not([style*="list-style: none"]) li::before {
+            content: "";
+            position: absolute;
+            top: 20px;
+            left: 15px;
+            width: 7px;
+            height: 7px;
+            border-radius: 50%;
+            background: var(--color-primary);
+        }
+
+        /* [Components] */
+        .product-image-container {
+            width: 100%;
+            max-width: var(--fig-full);
+            margin: var(--spacing-element) auto 0;
+            border-radius: 18px;
+        }
+
+        .product-image {
+            width: 100%;
+            height: auto;
+            display: block;
+            box-shadow: var(--shadow-product);
+            border-radius: 18px;
+            border: 1px solid rgba(219, 228, 238, 0.9);
+            background: #fff;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+            margin-top: 20px;
+            font-size: 15px;
+            text-align: left;
+            background: #fff;
+            border: 1px solid var(--color-border);
+            border-radius: 14px;
+            overflow: hidden;
+        }
+
+        th {
+            padding: 12px;
+            border-bottom: 1px solid var(--color-border);
+            background: var(--color-surface-muted);
+            color: var(--color-primary-dark);
+            font-weight: 700;
+        }
+
+        td {
+            padding: 12px;
+            border-bottom: 1px solid rgba(219, 228, 238, 0.8);
+            color: #2e3a46;
+        }
+
+        tbody tr:last-child td {
+            border-bottom: none;
+        }
+
+        tbody tr:hover td {
+            background: rgba(15, 99, 168, 0.035);
+        }
+
+        /* [보(Beam) 설명 - 기본 접힘 / 클릭 시 펼침] */
+        .beam-definition {
+            background: #fff;
+            padding: 20px 30px;
+            border-radius: 18px;
+            margin-top: 30px;
+            border: 1px solid var(--color-border);
+            box-shadow: var(--shadow-card);
+        }
+
+        .beam-definition > summary {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 16px;
+            cursor: pointer;
+            list-style: none;
+        }
+
+        /* 사파리 기본 삼각형 마커 제거 */
+        .beam-definition > summary::-webkit-details-marker {
+            display: none;
+        }
+
+        .beam-definition > summary h3 {
+            font-size: 21px;
+            font-weight: 700;
+            color: var(--color-text-dark);
+            transition: color 0.2s ease;
+        }
+
+        .beam-definition > summary:hover h3 {
+            color: var(--color-primary);
+        }
+
+        .beam-definition > summary:focus-visible {
+            outline: 2px solid var(--color-primary);
+            outline-offset: 6px;
+            border-radius: 6px;
+        }
+
+        .beam-definition .chevron {
+            flex: 0 0 auto;
+            width: 9px;
+            height: 9px;
+            margin-right: 5px;
+            border-right: 2px solid var(--color-text-secondary);
+            border-bottom: 2px solid var(--color-text-secondary);
+            transform: rotate(45deg);
+            transition: transform 0.25s ease;
+        }
+
+        .beam-definition[open] .chevron {
+            transform: rotate(-135deg);
+        }
+
+        .beam-definition-body {
+            display: flex;
+            align-items: center;
+            gap: 34px;
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 1px solid var(--color-border);
+        }
+
+        .beam-copy {
+            flex: 1;
+        }
+
+        .beam-copy p {
+            font-size: 16px;
+            color: #424245;
+            line-height: 1.7;
+        }
+
+        .beam-art {
+            flex: 0 0 240px;
+        }
+
+        .beam-art img {
+            width: 100%;
+            height: auto;
+            border-radius: 14px;
+            box-shadow: 0 14px 35px rgba(18, 31, 46, 0.12);
+            border: 1px solid var(--color-border);
+        }
+
+        .feature-grid {
+            display: grid;
+            grid-template-columns: repeat(4, minmax(0, 1fr));
+            gap: 16px;
+            margin-top: 30px;
+        }
+
+        .feature-card {
+            position: relative;
+            min-height: 178px;
+            background: #fff;
+            padding: 22px;
+            border-radius: 18px;
+            border: 1px solid var(--color-border);
+            box-shadow: 0 14px 35px rgba(18, 31, 46, 0.07);
+            transition: transform 0.25s ease, box-shadow 0.25s ease;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-3px);
+            box-shadow: var(--shadow-card-hover);
+        }
+
+        .feature-card::before {
+            content: "";
+            display: block;
+            width: 38px;
+            height: 4px;
+            border-radius: var(--rounded-pill);
+            background: var(--card-color, var(--color-primary));
+            margin-bottom: 18px;
+        }
+
+        .feature-card h4 {
+            font-size: 17px;
+            margin-bottom: 10px;
+            line-height: 1.34;
+        }
+
+        .feature-card p {
+            font-size: 14px;
+            color: var(--color-text-secondary);
+            line-height: 1.62;
+        }
+
+        .feature-card--primary {
+            --card-color: var(--color-primary);
+        }
+
+        .feature-card--danger {
+            --card-color: var(--color-danger);
+        }
+
+        .feature-card--success {
+            --card-color: var(--color-success);
+        }
+
+        .feature-card--warm {
+            --card-color: var(--color-warm);
+        }
+
+        .spec-grid {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 14px;
+            margin-top: 20px;
+        }
+
+        .spec-grid ul {
+            display: contents;
+        }
+
+        .spec-grid li {
+            position: relative;
+            min-height: 92px;
+            padding: 18px 18px 18px 48px !important;
+            background: linear-gradient(180deg, #fff, #f7fafc) !important;
+            border: 1px solid var(--color-border) !important;
+            border-radius: 14px !important;
+            box-shadow: 0 10px 25px rgba(18, 31, 46, 0.04);
+        }
+
+        .spec-grid li::before {
+            content: "";
+            position: absolute;
+            top: 21px;
+            left: 20px;
+            width: 12px;
+            height: 12px;
+            border: 3px solid rgba(15, 99, 168, 0.2);
+            border-top-color: var(--color-primary);
+            border-radius: 50%;
+            background: #fff;
+        }
+
+        .process-flow {
+            display: grid;
+            grid-template-columns: repeat(4, minmax(0, 1fr));
+            gap: 12px;
+            margin-top: 22px;
+        }
+
+        .flow-step {
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+            min-height: 170px;
+            padding: 22px;
+            background: linear-gradient(180deg, #fff, #f8fbfd);
+            border: 1px solid var(--color-border);
+            border-radius: 16px;
+        }
+
+        .flow-step::after {
+            content: "";
+            position: absolute;
+            top: 50%;
+            right: -10px;
+            width: 18px;
+            height: 2px;
+            background: var(--color-border);
+        }
+
+        .flow-step:last-child::after {
+            display: none;
+        }
+
+        .step-number {
+            width: 42px;
+            height: 42px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 13px;
+            background: var(--color-primary);
+            color: #fff;
+            font-size: 13px;
+            font-weight: 700;
+            letter-spacing: 0.04em;
+        }
+
+        .flow-step p {
+            margin: 0;
+            font-size: 15px;
+            line-height: 1.6;
+            color: #344252;
+        }
+
+        .case-card {
+            border-left: none !important;
+        }
+
+        .case-card::before {
+            height: 5px;
+        }
+
+        .case-card--primary::before {
+            background: linear-gradient(90deg, var(--color-primary), var(--color-accent));
+        }
+
+        .case-card--violet::before {
+            background: linear-gradient(90deg, #5856d6, var(--color-accent));
+        }
+
+        .case-heading {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 16px;
+        }
+
+        .case-badge {
+            flex: 0 0 auto;
+            font-size: 13px;
+            color: var(--color-primary-dark);
+            background: rgba(15, 99, 168, 0.08);
+            padding: 6px 12px;
+            border-radius: var(--rounded-pill);
+            font-weight: 600;
+        }
+
+        .case-grid {
+            display: grid;
+            grid-template-columns: minmax(0, 1.55fr) minmax(260px, 0.95fr);
+            gap: 28px;
+            margin-top: 22px;
+        }
+
+        .analysis-note {
+            background: var(--color-surface-muted);
+            padding: 20px;
+            border-radius: 16px;
+            font-size: 14px;
+            line-height: 1.7;
+            border: 1px solid var(--color-border);
+        }
+
+        .analysis-note p:first-child {
+            color: var(--color-primary-dark) !important;
+            font-weight: 700;
+        }
+
+        .image-pair {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: var(--grid-gap);
+            margin-top: 22px;
+        }
+
+        .image-stack {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 34px;
+            max-width: var(--fig-full);
+            margin: var(--spacing-element) auto 0;
+        }
+
+        .result-callout {
+            margin-top: 30px;
+            padding: 18px 20px;
+            background: rgba(228, 87, 61, 0.07);
+            border-radius: 14px;
+            border: 1px solid rgba(228, 87, 61, 0.16);
+        }
+
+        /* [Footer] */
+        .footer {
+            background: var(--color-canvas-parchment);
+            padding: 60px 22px;
+            border-top: 1px solid rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+
+        .footer p {
+            font-size: 14px;
+            color: var(--color-text-secondary);
+            line-height: 2;
+        }
+
+        .footer-contact {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 10px 26px;
+            margin-bottom: 22px;
+            padding-bottom: 22px;
+            border-bottom: 1px solid var(--color-border);
+        }
+
+        .footer-contact a {
+            display: inline-flex;
+            align-items: center;
+            gap: 7px;
+            color: var(--color-text-dark);
+            text-decoration: none;
+            font-size: 15px;
+            font-weight: 600;
+        }
+
+        .footer-contact a:hover {
+            color: var(--color-primary);
+            text-decoration: underline;
+        }
+
+        .footer-contact .fc-label {
+            color: var(--color-text-secondary);
+            font-size: 12.5px;
+            font-weight: 700;
+            letter-spacing: 0.04em;
+        }
+
+        /* [영상 썸네일] 클릭 전에는 포스터 이미지만 -> 영상 데이터는 받지 않음 */
+        .video-figure {
+            max-width: var(--fig-full);
+            margin: var(--spacing-element) auto 0;
+        }
+
+        .video-thumb {
+            position: relative;
+            display: block;
+            width: 100%;
+            padding: 0;
+            border: 1px solid var(--color-border);
+            border-radius: 18px;
+            overflow: hidden;
+            background: #000;
+            cursor: pointer;
+            box-shadow: var(--shadow-product);
+            font-family: inherit;
+        }
+
+        .video-thumb img {
+            width: 100%;
+            height: auto;
+            display: block;
+            transition: transform 0.4s ease, opacity 0.3s ease;
+        }
+
+        .video-thumb:hover img {
+            transform: scale(1.03);
+            opacity: 0.88;
+        }
+
+        .video-thumb .video-play {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 74px;
+            height: 74px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.92);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
+            transition: transform 0.25s ease, background 0.25s ease;
+        }
+
+        .video-thumb .video-play::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 54%;
+            transform: translate(-50%, -50%);
+            border-style: solid;
+            border-width: 12px 0 12px 20px;
+            border-color: transparent transparent transparent var(--color-primary);
+        }
+
+        .video-thumb:hover .video-play {
+            transform: translate(-50%, -50%) scale(1.08);
+            background: #fff;
+        }
+
+        .video-thumb:focus-visible {
+            outline: 3px solid var(--color-primary);
+            outline-offset: 3px;
+        }
+
+        .video-thumb .video-dur {
+            position: absolute;
+            right: 14px;
+            bottom: 14px;
+            padding: 4px 10px;
+            border-radius: var(--rounded-pill);
+            background: rgba(0, 0, 0, 0.68);
+            color: #fff;
+            font-size: 12.5px;
+            font-weight: 600;
+            letter-spacing: 0.02em;
+        }
+
+        .video-figure figcaption {
+            font-size: 13.5px;
+            color: var(--color-text-secondary);
+            text-align: center;
+            margin-top: 12px;
+            line-height: 1.55;
+        }
+
+        /* [Video Modal] */
+        .video-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.9);
+            z-index: 20000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .video-modal.active {
+            display: flex;
+        }
+
+        .video-modal .modal-content {
+            position: relative;
+            width: 90%;
+            max-width: 1200px;
+        }
+
+        .video-modal video {
+            width: 100%;
+            border-radius: 12px;
+            box-shadow: 0 0 50px rgba(0, 0, 0, 0.5);
+        }
+
+        .video-modal .youtube-frame {
+            position: relative;
+            width: 100%;
+            aspect-ratio: 16 / 9;
+            border-radius: 12px;
+            overflow: hidden;
+            background: #000;
+            box-shadow: 0 0 50px rgba(0, 0, 0, 0.5);
+        }
+
+        .video-modal .youtube-frame iframe {
+            position: absolute;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            border: 0;
+        }
+
+        /* keep the 16:9 frame inside the viewport on short/wide screens */
+        #youtubeModal .modal-content {
+            max-width: min(1200px, 158vh);
+        }
+
+        .video-modal .close-btn {
+            position: absolute;
+            top: -40px;
+            right: 0;
+            color: #fff;
+            font-size: 30px;
+            cursor: pointer;
+            background: none;
+            border: none;
+            font-weight: 300;
+        }
+
+        /* 좁은 노트북에서는 탭 바가 잘리지 않도록 한 단계 줄인다 */
+        @media (max-width: 1180px) {
+            .tab-link {
+                font-size: 13px;
+                padding: 7px 8px;
+            }
+
+            .product-link {
+                font-size: 12.5px;
+                padding: 6px 10px;
+            }
+
+            .tab-container {
+                gap: 4px;
+            }
+        }
+
+        /* [Responsive] */
+        @media (max-width: 734px) {
+            :root {
+                --spacing-section: 36px;
+                --spacing-element: 24px;
+                --nav-height-global: 86px;
+                --nav-height-tabs: 48px;
+            }
+
+            .global-nav {
+                align-items: stretch;
+            }
+
+            .global-nav .nav-container {
+                max-width: none;
+                padding: 8px 14px;
+                display: grid;
+                grid-template-columns: 1fr auto;
+                grid-template-areas:
+                    "logo tools"
+                    "actions actions";
+                row-gap: 6px;
+                column-gap: 12px;
+                justify-content: initial;
+            }
+
+            .global-nav .logo {
+                grid-area: logo;
+                justify-self: start;
+                align-self: center;
+                font-size: 13px;
+            }
+
+            .global-nav .left-button {
+                position: static;
+                grid-area: actions;
+                justify-self: start;
+                display: flex;
+                width: 100%;
+                gap: 8px;
+                overflow-x: auto;
+                padding-bottom: 2px;
+                -webkit-overflow-scrolling: touch;
+            }
+
+            .global-nav .left-button .btn-design {
+                flex: 0 0 auto;
+                font-size: 10px;
+                padding: 4px 10px;
+            }
+
+            .global-nav .left-button .btn-design + .btn-design {
+                margin-left: 0 !important;
+            }
+
+            .global-nav .nav-tools {
+                position: static;
+                grid-area: tools;
+                justify-self: end;
+                gap: 8px;
+            }
+
+            .global-nav .nav-tools .right-logo {
+                display: flex;
+                height: 15px;
+                max-width: 48px;
+                overflow: hidden;
+            }
+
+            .global-nav .nav-tools .right-logo img {
+                max-width: 48px;
+                object-fit: contain;
+            }
+
+            .lang-selector {
+                gap: 4px;
+            }
+
+            .lang-btn {
+                font-size: 10px;
+                padding: 3px 7px;
+            }
+
+            .tab-wrapper {
+                position: relative;
+                justify-content: center;
+                overflow: visible;
+                padding: 0 12px;
+            }
+
+            .mobile-menu-toggle {
+                display: inline-flex;
+            }
+
+            .tab-container {
+                position: absolute;
+                top: calc(100% + 8px);
+                left: 12px;
+                right: 12px;
+                display: none;
+                flex-direction: column;
+                justify-content: flex-start;
+                gap: 6px;
+                padding: 10px;
+                border: 1px solid rgba(15, 99, 168, 0.14);
+                border-radius: 16px;
+                background: rgba(255, 255, 255, 0.98);
+                box-shadow: 0 20px 50px rgba(18, 31, 46, 0.16);
+                backdrop-filter: blur(18px);
+                z-index: 10002;
+            }
+
+            .tab-nav.menu-open .tab-container {
+                display: flex;
+            }
+
+            .tab-link {
+                width: 100%;
+                flex: 0 0 auto;
+                padding: 13px 15px;
+                border-radius: 12px;
+                font-size: 15px;
+                text-align: left;
+            }
+
+            .tab-divider {
+                width: 100%;
+                height: 1px;
+                margin: 4px 0;
+            }
+
+            .product-link {
+                width: 100%;
+                justify-content: space-between;
+                padding: 12px 14px;
+                border-radius: 12px;
+                font-size: 14px;
+            }
+
+            .page-content {
+                padding-top: calc(var(--nav-height-global) + var(--nav-height-tabs) + var(--spacing-section));
+            }
+
+            .container {
+                padding: 0 16px;
+            }
+
+            .section-headline {
+                font-size: 26px;
+                line-height: 1.18;
+                letter-spacing: 0;
+            }
+
+            .section-subhead {
+                font-size: 16px;
+                line-height: 1.5;
+            }
+
+            .footer-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .technical-box {
+                padding: 22px;
+                border-radius: 14px;
+            }
+
+            .technical-box h3 {
+                font-size: 20px;
+            }
+
+            .technical-box p,
+            .technical-box ul {
+                font-size: 15px;
+            }
+
+            .product-image-container {
+                margin-top: 24px;
+                overflow-x: auto;
+            }
+
+            .product-image,
+            img,
+            video {
+                max-width: 100%;
+                height: auto;
+            }
+
+            #overview .beam-definition {
+                display: none !important;
+            }
+
+            .feature-grid,
+            .spec-grid,
+            .process-flow,
+            .case-grid,
+            .image-pair {
+                grid-template-columns: 1fr !important;
+            }
+
+            .feature-card {
+                min-height: auto;
+                padding: 20px;
+            }
+
+            .spec-grid ul {
+                display: grid;
+                gap: 10px;
+            }
+
+            .spec-grid li {
+                min-height: auto;
+            }
+
+            .flow-step {
+                min-height: auto;
+            }
+
+            .flow-step::after {
+                top: auto;
+                right: auto;
+                bottom: -10px;
+                left: 32px;
+                width: 2px;
+                height: 18px;
+            }
+
+            .case-heading {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .case-badge {
+                white-space: normal;
+            }
+
+            .container div[style*="grid-template-columns"] {
+                grid-template-columns: 1fr !important;
+                gap: 18px !important;
+            }
+
+            #economy .technical-box > h3 {
+                flex-direction: column;
+                align-items: flex-start !important;
+                gap: 10px;
+            }
+
+            #economy .technical-box > h3 span[id$="-badge"] {
+                align-self: flex-start;
+            }
+
+            table:not(.ref-info-table) {
+                display: block;
+                width: 100%;
+                max-width: 100%;
+                overflow-x: auto;
+                white-space: nowrap;
+                font-size: 14px;
+                -webkit-overflow-scrolling: touch;
+            }
+
+            th,
+            td {
+                padding: 10px;
+            }
+
+            .reference-grid {
+                grid-template-columns: 1fr !important;
+                gap: 20px !important;
+                margin-top: 30px !important;
+            }
+
+            .reference-card img {
+                height: auto !important;
+                max-height: none;
+            }
+
+            .ref-content {
+                padding: 16px;
+            }
+
+            .ref-info-table,
+            .ref-info-table tbody,
+            .ref-info-table tr {
+                display: block;
+                width: 100%;
+            }
+
+            .ref-info-table td {
+                display: block;
+                width: auto;
+                padding: 2px 0;
+            }
+
+            .ref-label {
+                width: auto;
+            }
+
+            .footer {
+                padding: 42px 16px;
+            }
+
+            .video-modal .modal-content {
+                width: calc(100% - 24px);
+            }
+
+            .video-modal .close-btn {
+                top: -36px;
+                right: 0;
+            }
+        }
+
+        @media (max-width: 420px) {
+            :root {
+                --nav-height-global: 92px;
+            }
+
+            .global-nav .nav-container {
+                padding-right: 12px;
+                padding-left: 12px;
+            }
+
+            .lang-btn {
+                padding: 3px 5px;
+                font-size: 9px;
+            }
+
+            .global-nav .nav-tools {
+                gap: 5px;
+            }
+
+            .global-nav .nav-tools .right-logo {
+                height: 13px;
+                max-width: 42px;
+            }
+
+            .global-nav .nav-tools .right-logo img {
+                max-width: 42px;
+            }
+
+            .section-headline {
+                font-size: 24px;
+            }
+
+            .technical-box {
+                padding: 18px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <nav class="global-nav">
+        <div class="nav-container">
+            <div class="left-button">
+                <a id="btn-design-text" href="https://besto-dev.agreeabletree-f610a989.koreacentral.azurecontainerapps.io/" target="_blank"
+                    class="btn-design">BESTOBEAM 설계</a>
+                <button id="btn-video-text" onclick="openVideoModal()" class="btn-design">홍보영상</button>
+                <button id="btn-drb-text" onclick="openYoutubeModal()" class="btn-design">DRB 소개</button>
+            </div>
+            <a href="#" class="logo">BESTOBEAM</a>
+            <div class="nav-tools">
+                <div class="lang-selector">
+                    <button onclick="changeLang(this, 'ko')" data-lang="ko" class="lang-btn active">KR</button>
+                    <button onclick="changeLang(this, 'en')" data-lang="en" class="lang-btn">EN</button>
+                    <button onclick="changeLang(this, 'zh')" data-lang="zh" class="lang-btn">CN</button>
+                    <button onclick="changeLang(this, 'vi')" data-lang="vi" class="lang-btn">VN</button>
+                </div>
+                <div class="right-logo">
+                    <img width="123" height="42" decoding="async" src="assets/images/drb.webp" alt="DRB Logo">
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <nav class="tab-nav">
+        <div class="tab-wrapper">
+            <button class="mobile-menu-toggle" type="button" aria-expanded="false" aria-controls="sectionMenu"
+                onclick="toggleMobileMenu(event)">
+                <span id="mobile-menu-current">제품 개요</span>
+                <span class="hamburger-lines" aria-hidden="true">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </span>
+            </button>
+            <div id="sectionMenu" class="tab-container">
+                <button id="nav-overview" class="tab-link active" onclick="showTab(event, 'overview')">제품 개요</button>
+                <button id="nav-principle" class="tab-link" onclick="showTab(event, 'principle')">구조 설계 원리</button>
+                <button id="nav-test" class="tab-link" onclick="showTab(event, 'test')">실험 및 성능</button>
+                <button id="nav-certification" class="tab-link" onclick="showTab(event, 'certification')">기술인증</button>
+                <button id="nav-process" class="tab-link" onclick="showTab(event, 'process')">시공 프로세스</button>
+                <button id="nav-economy" class="tab-link" onclick="showTab(event, 'economy')">경제성 비교</button>
+                <button id="nav-height" class="tab-link" onclick="showTab(event, 'height')">층고 및 효율</button>
+                <button id="nav-vibration" class="tab-link" onclick="showTab(event, 'vibration')">진동 성능</button>
+                <button id="nav-reference" class="tab-link" onclick="showTab(event, 'reference')">주요 실적</button>
+                <span class="tab-divider" aria-hidden="true"></span>
+                <a id="btn-np-text" href="npcolumn.html" class="product-link">NP Column</a>
+                <a id="btn-pc-text" href="hollowpc.html" class="product-link">중공PC기둥</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- [1. 제품 개요] -->
+    <main id="overview" class="page-content active">
+        <div class="container">
+            <h1 id="overview-title" class="section-headline">BESTOBEAM: <br>합성보의 장점과 시공 편의성의 결합.</h1>
+            <p id="overview-subhead" class="section-subhead">『BEst Solution TO customer』 BEAM. H-section과 U-section의
+                하이브리드 설계로 시공성을 혁신합니다.</p>
+
+            <details class="beam-definition">
+                <summary>
+                    <h3 id="beam-def-title">💡 보(Beam)란 무엇인가요?</h3>
+                    <span class="chevron" aria-hidden="true"></span>
+                </summary>
+                <div class="beam-definition-body">
+                    <div class="beam-copy">
+                        <p id="beam-def-desc">
+                            건물의 뼈대에서 <strong>가로(수평)로 놓여 바닥을 직접 받치는 핵심 부재</strong>입니다.
+                            사람의 몸에 비유하면 척추와 연결되어 몸통을 지탱하는 '갈비뼈'와 같은 역할을 합니다.
+                            바닥에 가해지는 모든 무게(사람, 가구 등)를 견디고 이를 다시 세로 기둥으로 전달하여 건물이 무너지지 않게 지탱하는 아주 중요한 뼈대입니다.
+                        </p>
+                    </div>
+                    <div class="beam-art">
+                        <img loading="lazy" width="431" height="585" decoding="async" src="assets/images/beam.webp" alt="건물 뼈대에서 가로 부재인 '보'를 강조한 개념도">
+                    </div>
+                </div>
+            </details>
+
+            <div class="feature-grid">
+                <div class="feature-card feature-card--primary">
+                    <h4 id="ov-econ-title">1. 경제성 (Economy)</h4>
+                    <p id="ov-econ-desc">기존 철골보 대비 <strong>30~40% 강재량
+                            절감</strong>. 장스팬 및 고하중 건물에서 경제성이 극대화됩니다.</p>
+                </div>
+                <div class="feature-card feature-card--danger">
+                    <h4 id="ov-const-title">2. 시공성 (Constructability)</h4>
+                    <p id="ov-const-desc">기존 <strong>H형강 시공방법과 동일</strong>하여 현장
+                        숙련도가 높고 공기 단축 및 품질 확보가 용이합니다.</p>
+                </div>
+                <div class="feature-card feature-card--success">
+                    <h4 id="ov-flex-title">3. 융통성 (Flexibility)</h4>
+                    <p id="ov-flex-desc"><strong>역타공법(Top-Down)</strong>에도 적용이
+                        용이하며, 기둥의 종류(철골, SRC, CFT 등)에 관계없이 설치 가능합니다.</p>
+                </div>
+                <div class="feature-card feature-card--warm">
+                    <h4 id="ov-sust-title">4. 지속가능성 (Sustainability)</h4>
+                    <p id="ov-sust-desc"><strong>층고 절감 효과</strong>와 재료 사용량 절감에
+                        따른 탄소(CO2) 배출량 저감으로 친환경 건축을 실현합니다.</p>
+                </div>
+            </div>
+
+            <div class="product-image-container">
+                <img loading="lazy" width="986" height="412" decoding="async" src="assets/images/1-1.webp" alt="BESTOBEAM 합성보의 H-Section과 U-Section 결합 구조 및 접합부 상세"
+                    class="product-image">
+            </div>
+
+            <div class="technical-box">
+                <h3 id="comp-title">베스토빔의 구성 및 사양 (사용강종: SM355 또는 동등 성능 강종)</h3>
+                <p id="comp-desc">베스토빔은 정밀하게 가공된 각 부속 요소들의 결합을 통해 구조적 무결성을 유지합니다.</p>
+                <div class="spec-grid">
+                    <ul>
+                        <li id="comp-h"><strong id="comp-h-label">H-단면 (End Section):</strong> 기둥 접합부의 전단력과 부모멘트를 부담.
+                        </li>
+                        <li id="comp-u"><strong id="comp-u-label">U-단면 (Center Section):</strong> 콘크리트 충전 및 정모멘트 저항 구간.
+                        </li>
+                        <li id="comp-overlap"><strong id="comp-overlap-label">겹침구간 (Overlap):</strong> 두 단면 사이의 힘을 안전하게
+                            전달하는 전이 구간.</li>
+                    </ul>
+                    <ul>
+                        <li id="comp-angle"><strong id="comp-angle-label">앵글 (L-50X6):</strong> U-단면 상부의 횡변위 제어 및 전단 연결재
+                            역할.</li>
+                        <li id="comp-stud"><strong id="comp-stud-label">스터드 (Stud Bolt):</strong> 보강판과 H-단면의 일체성 확보.
+                        </li>
+                        <li id="comp-stiffener"><strong id="comp-stiffener-label">보강판 (Stiffener):</strong> 하중 집중 구간의 국부
+                            좌굴 방지 및 강성 보강.</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="product-image-container" style="margin-top: 40px;">
+                <img loading="lazy" width="2000" height="1172" decoding="async" src="assets/images/1-2.webp" alt="베스토빔의 구성 요소(보강판, 스터드, 앵글, 데크슬래브 등) 분해 조립도"
+                    class="product-image">
+            </div>
+        </div>
+    </main>
+
+    <!-- [2. 구조 설계 원리] -->
+    <main id="principle" class="page-content">
+        <div class="container">
+            <h1 id="princ-title" class="section-headline">단면 설계 최적화 로직.</h1>
+            <p id="princ-subhead" class="section-subhead">모멘트 크기에 따른 부재의 변동적 배치로 강재 효율을 극대화합니다.</p>
+            <div class="technical-box">
+                <h3 id="princ-load-title">하중 분포에 따른 단면 배치</h3>
+                <p id="princ-load-desc">연속보에서 지점부(단부)는 큰 부모멘트(-)가 발생하며, 중앙부는 정모멘트(+)가 발생합니다. BESTOBEAM은 이 메커니즘을 정확히
+                    추종합니다.</p>
+                <ul>
+                    <li id="princ-load-end"><strong>단부 (End Section):</strong> 부모멘트 저항에 유리한 H형강 플랜지 구조 적용.</li>
+                    <li id="princ-load-center"><strong>중앙부 (Center Section):</strong> 콘크리트 충전 및 하부 인장력 저항에 최적화된 U형 단면
+                        적용.</li>
+                </ul>
+            </div>
+            <div class="product-image-container">
+                <img loading="lazy" width="961" height="507" decoding="async" src="assets/images/2-1.webp" alt="모멘트 선도와 연동된 BESTOBEAM의 단면 최적화 배치 개념도" class="product-image">
+            </div>
+            <div class="technical-box">
+                <h3 id="princ-proc-title">구조 설계 프로세스</h3>
+                <div class="process-flow">
+                    <div class="flow-step">
+                        <span class="step-number">01</span>
+                        <p id="princ-proc-1">1. 대상 구조물의 하중 분석 및 구조 해석 수행</p>
+                    </div>
+                    <div class="flow-step">
+                        <span class="step-number">02</span>
+                        <p id="princ-proc-2">2. 위치별 최대 모멘트 및 전단력 산출</p>
+                    </div>
+                    <div class="flow-step">
+                        <span class="step-number">03</span>
+                        <p id="princ-proc-3">3. BESTOBEAM 최적 단면(H-U 전환점) 산정 로직 적용</p>
+                    </div>
+                    <div class="flow-step">
+                        <span class="step-number">04</span>
+                        <p id="princ-proc-4">4. 구조 검토서 생성 및 상세 설계 도면 작성</p>
+                    </div>
+                </div>
+            </div>
+            <div class="product-image-container" style="margin-top: 30px;">
+                <img loading="lazy" width="2000" height="1092" decoding="async" src="assets/images/2-2.webp" alt="구조 설계 프로세스 및 단면 최적화 상세" class="product-image">
+            </div>
+        </div>
+    </main>
+
+    <!-- [3. 실험 및 성능 검증] -->
+    <main id="test" class="page-content">
+        <div class="container">
+            <h1 id="test-title" class="section-headline">실증적 검증: <br>RIST/KOLAS 인증 실험 결과.</h1>
+            <p id="test-subhead" class="section-subhead">공인 기관의 엄격한 테스트를 통해 구조 성능과 안전성을 입증했습니다.</p>
+            <div class="technical-box">
+                <h3 id="test-bend-title">휨 성능 실험 (Bending Performance)</h3>
+                <p id="test-bend-desc">설계 강도 대비 120% 이상의 내력을 발휘하며, 안정적인 하중-변위 곡선을 나타내어 구조적 신뢰성을 확보했습니다.</p>
+            </div>
+            <div class="product-image-container">
+                <img loading="lazy" width="1191" height="771" decoding="async" src="assets/images/3-1.webp" alt="하중-변위 그래프 및 RIST 실험체 가력 전경" class="product-image">
+            </div>
+            <div class="technical-box">
+                <h3 id="test-shear-title">전단 연결재 거동 실험 (Shear Connector Test)</h3>
+                <p id="test-shear-desc">단부 H형강과 중앙부 U형강의 접합부에서 발생하는 전단력 흐름의 연속성을 검증하여 일체형 거동을 확인했습니다.</p>
+            </div>
+            <div class="product-image-container">
+                <img loading="lazy" width="1121" height="508" decoding="async" src="assets/images/3-2.webp" alt="전단 연결재 실험 세팅 및 파괴 모드 분석" class="product-image">
+            </div>
+
+            <!-- [추가: 내진 성능] -->
+            <div class="technical-box" style="margin-top: 40px; border-left: 5px solid #ff9500;">
+                <h3 id="test-seismic-title">내진 성능 (Seismic Performance)</h3>
+                <ul style="list-style: none; margin-left: 0; margin-top: 15px;">
+                    <li style="margin-bottom: 12px; display: flex; align-items: flex-start; gap: 10px;">
+                        <span style="font-size: 18px; color: var(--color-text-dark);">➢</span>
+                        <span id="test-seismic-item1"><strong>보-기둥 접합부 내진성능 실험 검증 :</strong> 반복 가력 실험을 통해 실제 지진 상황과 유사한
+                            조건에서 접합부의 구조 안전성을 확인했습니다.</span>
+                    </li>
+                    <li style="display: flex; align-items: flex-start; gap: 10px;">
+                        <span style="font-size: 18px; color: var(--color-text-dark);">➢</span>
+                        <span id="test-seismic-item2"><strong>우수한 변형 능력 :</strong> <strong>3%~4%의 고연성도</strong> 접합부
+                            회전능력을 확보하여 지진 에너지를 효과적으로 흡수할 수 있음을 입증했습니다.</span>
+                    </li>
+                </ul>
+            </div>
+            <div class="product-image-container" style="margin-top: 30px;">
+                <img loading="lazy" width="2000" height="876" decoding="async" src="assets/images/3-3.webp" alt="보-기둥 접합부 내진성능 실험 데이터 및 파괴 모드 분석" class="product-image">
+            </div>
+        </div>
+    </main>
+
+    <!-- [3. 기술 인증] -->
+    <main id="certification" class="page-content">
+        <div class="container">
+            <h1 id="cert-title" class="section-headline">기술인증 및 특허.</h1>
+            <p id="cert-subhead" class="section-subhead">국내외 공인 기관을 통해 검증된 기술력으로 최상의 신뢰를 제공합니다.</p>
+
+            <div class="technical-box">
+                <h3 id="cert-intel-title">국내외 기술인증 및 지식재산권</h3>
+                <p id="cert-intel-desc">건설신기술 지정을 포함하여 국내외 특허 및 구조기술사회의 엄격한 기술 검증을 완료했습니다.</p>
+                <ul style="margin-top: 10px;">
+                    <li id="cert-net"><strong>건설신기술(NET) 지정 [제 835호]:</strong> 국토교통부 신기술 지정 (H형-U형 조합 합성보 공법)</li>
+                    <li id="cert-patents"><strong>지식재산권 확보:</strong> 국내 특허 5건 및 미국 특허 등록을 통한 독자적 기술 보호</li>
+                    <li id="cert-ksea"><strong>기술인증서 획득:</strong> (사)한국건축구조기술사회로부터 구조 시스템의 기술력 및 안전성 인증</li>
+                </ul>
+            </div>
+            <div class="product-image-container">
+                <img loading="lazy" width="1448" height="743" decoding="async" src="assets/images/4-1.webp" alt="건설신기술 지정서, 국내외 특허 및 한국건축구조기술사회 인증서 현황" class="product-image">
+            </div>
+
+            <div class="technical-box" style="margin-top: 40px;">
+                <h3 id="cert-icc-title">미국 ICC-ES 인증 획득</h3>
+                <p id="cert-icc-desc">글로벌 건축물 설계 및 시공 기준을 충족하여 해외 시장에서의 기술적 신뢰성을 확보했습니다.</p>
+                <ul style="margin-top: 10px;">
+                    <li id="cert-icc-no"><strong>인증번호:</strong> ESR-4134 (ICC-ES Evaluation Report)</li>
+                    <li id="cert-icc-verify"><strong>검증내용:</strong> U-Shaped Steel-Concrete Composite Beam 시스템의 구조 성능 및
+                        미국 건축법규(IBC) 적합성 검증</li>
+                    <li id="cert-icc-sig"><strong>의의:</strong> 글로벌 수준의 구조 성능 및 안전성 입증</li>
+                </ul>
+            </div>
+            <div class="product-image-container">
+                <img loading="lazy" width="1455" height="670" decoding="async" src="assets/images/4-2.webp" alt="미국 ICC-ES 인증 보고서 및 기술 검토 자료" class="product-image">
+            </div>
+        </div>
+    </main>
+
+    <!-- [4. 시공 프로세스] -->
+    <main id="process" class="page-content">
+        <div class="container">
+            <h1 id="proc-title" class="section-headline">베스토빔 시공 혁신: <br>효율적 접합과 무거푸집 표준 공정.</h1>
+            <p id="proc-subhead" class="section-subhead">기존 공법의 친숙한 접합 방식에 무거푸집 기술을 결합하여 공기 단축과 현장 안전성을 동시에 실현합니다.</p>
+
+            <div class="technical-box" style="margin-top: 20px; border-left: 5px solid var(--color-primary);">
+                <h3 id="proc-girder-title">Girder 접합 특징</h3>
+                <ul style="list-style: none; margin-left: 0; margin-top: 15px;">
+                    <li style="margin-bottom: 12px; display: flex; align-items: flex-start; gap: 10px;">
+                        <span style="font-size: 18px; color: var(--color-text-dark);">➢</span>
+                        <span id="proc-girder-item1"><strong>접합방법은 기존 공사방법과 동일 :</strong> 현장 작업자들에게 친숙한 방식으로 공기 단축
+                            가능</span>
+                    </li>
+                    <li style="display: flex; align-items: flex-start; gap: 10px;">
+                        <span style="font-size: 18px; color: var(--color-text-dark);">➢</span>
+                        <span id="proc-girder-item2"><strong>공장 제작(Angle) :</strong> 전단연결재인 앵글을 공장에서 미리 용접 제작하여 현장 시공이
+                            기존보다 더 편리함</span>
+                    </li>
+                </ul>
+            </div>
+
+            <div class="product-image-container" style="margin-top: 30px; margin-bottom: 10px;">
+                <img loading="lazy" width="2000" height="1166" decoding="async" src="assets/images/8-3.webp" alt="Girder 접합 상세 및 공기단축 개념도" class="product-image" style="box-shadow: none;">
+            </div>
+
+            <div class="technical-box" style="margin-top: 20px; border-left: 5px solid #5856d6;">
+                <h3 id="proc-beam-title">Beam 접합 특징</h3>
+                <ul style="list-style: none; margin-left: 0; margin-top: 15px;">
+                    <li style="display: flex; align-items: flex-start; gap: 10px;">
+                        <span style="font-size: 18px; color: var(--color-text-dark);">➢</span>
+                        <span id="proc-beam-item1"><strong>U형 브라켓 활용 :</strong> Girder에 U형 브라켓을 설치하여, Beam 설치 시 시공 편의성
+                            증대 및 작업안전성 개선</span>
+                    </li>
+                </ul>
+            </div>
+
+            <div class="product-image-container" style="margin-top: 30px; margin-bottom: 10px;">
+                <img loading="lazy" width="1192" height="722" decoding="async" src="assets/images/8-4.webp" alt="Beam 접합 상세 및 시공 편의성 이미지" class="product-image" style="box-shadow: none;">
+            </div>
+
+            <div class="technical-box" style="margin-top: 30px;">
+                <h3 id="proc-step-title">표준 시공 순서</h3>
+                <ul>
+                    <li id="proc-step-1"><strong>(1) Base Plate 및 철골 기둥 설치:</strong> 기초 베이스 플레이트 고정 및 기둥 하단 설치</li>
+                    <li id="proc-step-2"><strong>(2) 철골 기둥 세우기:</strong> 상부 철골 기둥 인양 및 수직 조립</li>
+                    <li id="proc-step-3"><strong>(3) Besto Composite Beam 설치:</strong> 기둥 사이 베스토 합성보 거치 및 접합</li>
+                    <li id="proc-step-4"><strong>(4) Deck Plate 및 기둥 거푸집 설치:</strong> 슬래브용 데크플레이트 및 기둥 타설용 거푸집 배치</li>
+                    <li id="proc-step-5"><strong>(5) Slab 및 하부 기둥 콘크리트 타설:</strong> 보/슬래브 내부 및 하부 기둥 동시 타설</li>
+                    <li id="proc-step-6"><strong>(6) 상부 기둥 및 상부 Slab 콘크리트 타설:</strong> 구조물 일체화를 위한 상부층 타설 및 마감</li>
+                </ul>
+            </div>
+            <div class="image-stack">
+                <img loading="lazy" width="2000" height="1563" decoding="async" src="assets/images/8-1.webp" alt="시공 프로세스 단계별 상세 1" class="product-image"
+                    style="margin-top: 0; box-shadow: none;">
+                <img loading="lazy" width="2000" height="880" decoding="async" src="assets/images/8-2.webp" alt="시공 프로세스 단계별 상세 2" class="product-image"
+                    style="margin-top: 0; box-shadow: none;">
+            </div>
+
+            <div class="technical-box" style="margin-top: 50px;">
+                <h3 id="proc-video-title">현장 설치 영상 — 제주공항 증축공사</h3>
+                <p id="proc-video-desc">실제 현장에서 베스토빔이 인양·거치되는 과정입니다. 기존 H형강과 동일한 접합 방식으로 진행되어 별도의 숙련 과정이 필요하지
+                    않습니다.</p>
+            </div>
+
+            <figure class="video-figure">
+                <button type="button" class="video-thumb" onclick="openInstallModal()" aria-label="제주공항 현장 설치 영상 재생">
+                    <img loading="lazy" width="1280" height="720" decoding="async" src="assets/images/install-poster.webp"
+                        alt="제주공항 증축공사 현장에서 철골 보를 거치하는 장면">
+                    <span class="video-play" aria-hidden="true"></span>
+                    <span class="video-dur">1:40</span>
+                </button>
+                <figcaption id="proc-video-caption">제주공항 증축공사 현장 — 베스토빔 설치 (1분 40초)</figcaption>
+            </figure>
+        </div>
+    </main>
+
+    <!-- [5. 경제성 및 적용 사례] -->
+    <main id="economy" class="page-content">
+        <div class="container">
+            <h1 id="econ-title" class="section-headline">VE(Value Engineering) 사례: <br>데이터로 입증된 최적화 솔루션.</h1>
+            <p id="econ-subhead" class="section-subhead">대표적인 두 가지 사례(숙박시설, 물류창고)를 통해 베스토빔의 실질적 경제성을 확인하십시오.</p>
+
+            <!-- [Case 1: 숙박시설] -->
+            <div class="technical-box case-card case-card--primary" style="margin-bottom: 40px;">
+                <h3 class="case-heading">
+                    <span id="econ-case1-title">CASE 01. 숙박시설 VE 적용 사례 (2F~11F)</span>
+                    <span id="econ-case1-badge" class="case-badge">지상층
+                        적용성 평가 완료</span>
+                </h3>
+
+                <div class="case-grid">
+                    <div>
+                        <p><strong id="econ-case1-cond">설계 조건 및 하중 계획:</strong></p>
+                        <ul style="margin-bottom: 20px;">
+                            <li id="econ-case1-dl">고정하중(DL): 4.9 kN/m² (Slab THK. 150mm 기준)</li>
+                            <li id="econ-case1-ll">활하중(LL): 3.5 kN/m² (업무 및 숙박 시설 기준)</li>
+                        </ul>
+                        <table>
+                            <thead>
+                                <tr style="background: #f1f1f1;">
+                                    <th id="econ-case1-th-cat">구분</th>
+                                    <th id="econ-case1-th-orig">원안 (H-형강)</th>
+                                    <th id="econ-case1-th-alt" style="color: var(--color-primary);">대안 (BESTOBEAM)</th>
+                                    <th id="econ-case1-th-rate">절감율</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td id="econ-case1-td-qty" style="font-weight: 600;">강재 물량 (층당)</td>
+                                    <td>61.946 ton</td>
+                                    <td style="font-weight: 700;">44.736 ton</td>
+                                    <td style="color: #ff3b30; font-weight: 700;">▼ 27.8%</td>
+                                </tr>
+                                <tr>
+                                    <td id="econ-case1-td-cost" style="font-weight: 600;">공사비 (층당)</td>
+                                    <td id="econ-case1-orig-cost">98,425,690 원</td>
+                                    <td id="econ-case1-alt-cost" style="font-weight: 700;">89,049,723 원</td>
+                                    <td style="color: #ff3b30; font-weight: 700;">▼ 9.5%</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="analysis-note">
+                        <p id="econ-case1-tip-title" style="color: var(--color-text-secondary); margin-bottom: 10px;">※
+                            엔지니어링 분석 포인트</p>
+                        <p id="econ-case1-tip-1">• 경제성 검토 범위에는 접합부, 브라켓, 잭서포트가 포함되었습니다.</p>
+                        <p id="econ-case1-tip-2">• 원안의 H형강이 최소화된 설계임에도 불구하고 <strong>약 28%의 추가 물량 절감</strong>을 달성했습니다.
+                        </p>
+                        <p id="econ-case1-tip-3">• 보 중앙부 기준 <strong>50mm의 여유 높이</strong>를 확보하여 공간 효율을 높였습니다.</p>
+                    </div>
+                </div>
+                <div class="image-pair">
+                    <img loading="lazy" width="995" height="663" decoding="async" src="assets/images/5-1.webp" alt="숙박시설 구조평면도" class="product-image">
+                    <img loading="lazy" width="750" height="497" decoding="async" src="assets/images/5-2.webp" alt="부재 리스트 비교" class="product-image">
+                </div>
+            </div>
+
+            <hr style="border: 0; border-top: 1px solid #eee; margin: 60px 0;">
+
+            <!-- [Case 2: 물류창고] -->
+            <div class="technical-box case-card case-card--violet">
+                <h3 class="case-heading">
+                    <span id="econ-case2-title">CASE 02. 대형 물류창고 VE 적용 사례</span>
+                    <span id="econ-case2-badge" class="case-badge">초고하중/장스팬
+                        최적화</span>
+                </h3>
+
+                <div class="case-grid">
+                    <div>
+                        <p><strong id="econ-case2-cond">초고하중 설계 조건:</strong></p>
+                        <ul style="margin-bottom: 20px;">
+                            <li id="econ-case2-dl">고정하중(DL): 6.62 kN/m² (Slab 180mm + 무근 100mm)</li>
+                            <li id="econ-case2-ll">활하중(LL): <strong>15.0 kN/m²</strong> (15m 구간은 <strong>24.0
+                                    kN/m²</strong> 적용)</li>
+                            <li id="econ-case2-span">스팬 규모: 11.5m ~ 15.0m 장스팬 구조</li>
+                        </ul>
+                        <table>
+                            <thead>
+                                <tr style="background: #f1f1f1;">
+                                    <th id="econ-case1-th-cat2">구분</th>
+                                    <th id="econ-case1-th-orig2">원안 (H-형강)</th>
+                                    <th id="econ-case1-th-alt2" style="color: #5856d6;">대안 (BESTOBEAM)</th>
+                                    <th id="econ-case1-th-rate2">절감율</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td id="econ-case2-td-qty" style="font-weight: 600;">검토범위 물량</td>
+                                    <td>268.2 ton</td>
+                                    <td style="font-weight: 700;">190.4 ton</td>
+                                    <td style="color: #ff3b30; font-weight: 700;">▼ 29.0%</td>
+                                </tr>
+                                <tr>
+                                    <td id="econ-case2-td-cost" style="font-weight: 600;">검토범위 공사비</td>
+                                    <td id="econ-case2-orig-cost">402,871,419 원</td>
+                                    <td id="econ-case2-alt-cost" style="font-weight: 700;">338,684,232 원</td>
+                                    <td style="color: #ff3b30; font-weight: 700;">▼ 15.9%</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="analysis-note">
+                        <p id="econ-case2-tip-title" style="color: var(--color-text-secondary); margin-bottom: 10px;">※
+                            물류창고 특화 분석</p>
+                        <p id="econ-case2-tip-1">• <strong>보 높이 축소:</strong> 중앙부 기준 <strong>100~250mm의 보 춤을
+                                축소</strong>하여 획기적인 층고 절감을 달성했습니다.</p>
+                        <p id="econ-case2-tip-2">• <strong>시공성 향상:</strong> 잭서포트가 필요 없는 설계로 공기 단축 및 시공비를 절감했습니다.</p>
+                        <p id="econ-case2-tip-3">• <strong>부재 효율화:</strong> 불필요한 보 부재(SB0 등)를 삭제하고 하이브리드 단면으로 대체하여
+                            <strong>물량 29%를 절감</strong>했습니다.
+                        </p>
+                    </div>
+                </div>
+                <div class="image-pair">
+                    <img loading="lazy" width="1243" height="662" decoding="async" src="assets/images/5-3.webp" alt="물류창고 구조평면도" class="product-image">
+                    <img loading="lazy" width="1307" height="627" decoding="async" src="assets/images/5-4.webp" alt="보부재 사이즈 비교표" class="product-image">
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- [6. 층고 및 공간 효율] -->
+    <main id="height" class="page-content">
+        <div class="container">
+            <h1 id="height-title" class="section-headline">건축적 가치: <br>층고 절감 및 공간 창출.</h1>
+            <p id="height-subhead" class="section-subhead">슬림해진 보 춤(Beam Depth)을 통해 건물 전체의 공간 효율을 극대화합니다.</p>
+            <div class="technical-box">
+                <h3 id="height-box-title">층당 200~400mm 층고 절감</h3>
+                <p id="height-box-desc">결과: 동일 건물 높이에서 더 높은 천장고를 제공하거나 전체 층수를 늘려 분양 수익성을 높일 수 있습니다.</p>
+            </div>
+            <div class="product-image-container">
+                <img loading="lazy" width="2000" height="1244" decoding="async" src="assets/images/6-1.webp" alt="기존 H형강 공법 vs BESTOBEAM의 층고 높이 비교 단면도" class="product-image">
+            </div>
+        </div>
+    </main>
+
+    <!-- [7. 진동 성능 향상] -->
+    <main id="vibration" class="page-content">
+        <div class="container">
+            <h1 id="vib-title" class="section-headline">정숙한 환경을 위한 <br>진동 제어 기술.</h1>
+            <p id="vib-subhead" class="section-subhead">콘크리트 충전 효과를 통한 강성 증대로 쾌적한 거주 환경을 제공합니다.</p>
+            <div class="technical-box">
+                <h3 id="vib-box-title" style="margin-bottom: 20px;">진동 특성 분석 및 성능 평가</h3>
+
+                <div style="margin-bottom: 25px;">
+                    <p id="vib-item1-title"
+                        style="font-weight: 700; color: var(--color-text-dark); margin-bottom: 8px;">● 임팩트해머 가진을 통한 진동특성
+                        분석</p>
+                    <p id="vib-item1-desc" style="margin-left: 20px; color: #424245;">- 계측된 데이터를 바탕으로 해당 바닥의 고유진동수와 감쇠비
+                        결정</p>
+                </div>
+
+                <div style="margin-bottom: 25px;">
+                    <p id="vib-item2-title"
+                        style="font-weight: 700; color: var(--color-text-dark); margin-bottom: 8px;">● 보행가진응답 측정 및 평가
+                    </p>
+                    <p id="vib-item2-desc" style="margin-left: 20px; color: #424245;">- 가진에 따라 계측된 최대가속도를 바탕으로 AISC
+                        Design Guide 11을 통해 성능평가</p>
+                </div>
+
+                <div class="result-callout">
+                    <p id="vib-result" style="color: #ff3b30; font-weight: 700; font-size: 18px; margin-bottom: 0;">
+                        <span style="font-size: 20px; margin-right: 8px;">➢</span> 평가 결과, 속보와 일반보행 모두 오피스 허용기준을 만족함
+                    </p>
+                </div>
+            </div>
+            <div class="image-stack">
+                <img loading="lazy" width="2000" height="1088" decoding="async" src="assets/images/7-1.webp" alt="진동 성능 분석 데이터 1" class="product-image" style="margin-top: 0;">
+                <img loading="lazy" width="2000" height="738" decoding="async" src="assets/images/7-2.webp" alt="진동 성능 분석 데이터 2" class="product-image" style="margin-top: 0;">
+            </div>
+        </div>
+    </main>
+
+    <!-- [8. 주요 적용 실적] -->
+    <main id="reference" class="page-content">
+        <div class="container">
+            <h1 id="ref-title" class="section-headline">국내외 주요 프로젝트 <br>적용 실적.</h1>
+            <p id="ref-subhead" class="section-subhead">2013년부터 현재까지 다양한 건축물에 적용되어 기술력을 증명하고 있습니다.</p>
+
+            <style>
+                .reference-grid {
+                    display: grid;
+                    grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+                    gap: var(--grid-gap);
+                    margin-top: 42px;
+                }
+
+                .reference-card {
+                    background: #fff;
+                    border-radius: 18px;
+                    overflow: hidden;
+                    border: 1px solid var(--color-border);
+                    box-shadow: 0 16px 42px rgba(18, 31, 46, 0.08);
+                    transition: transform 0.25s ease, box-shadow 0.25s ease;
+                }
+
+                .reference-card:hover {
+                    transform: translateY(-4px);
+                    box-shadow: var(--shadow-card-hover);
+                }
+
+                .ref-img-slot {
+                    width: 100%;
+                    height: 200px;
+                    background: #e8e8ed;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    color: #86868b;
+                    font-size: 14px;
+                    border-bottom: 1px solid #d2d2d7;
+                    text-align: center;
+                    padding: 20px;
+                }
+
+                .ref-content {
+                    padding: 22px;
+                }
+
+                .ref-title {
+                    font-size: 18px;
+                    font-weight: 700;
+                    margin-bottom: 12px;
+                    color: var(--color-text-dark);
+                }
+
+                .ref-info-table {
+                    width: 100%;
+                    font-size: 14px;
+                    border: none;
+                    border-collapse: collapse;
+                    border-radius: 0;
+                    margin-top: 0;
+                    background: transparent;
+                }
+
+                .ref-info-table td {
+                    padding: 5px 0;
+                    border-bottom: none;
+                }
+
+                .ref-label {
+                    color: var(--color-text-secondary);
+                    width: 80px;
+                    font-size: 13px;
+                }
+
+                .ref-value {
+                    color: #1d1d1f;
+                    font-weight: 500;
+                }
+            </style>
+
+            <div class="reference-grid">
+                <!-- 10. 평택 삼성전자 사무2동 -->
+                <div class="reference-card">
+                    <img loading="lazy" width="1200" height="584" decoding="async" src="assets/images/9-1.webp" alt="평택 삼성전자 사무2동"
+                        style="width: 100%; height: 220px; object-fit: cover; display: block;">
+                    <div class="ref-content">
+                        <div class="ref-title" id="ref-card1-title">평택 삼성전자 사무2동</div>
+                        <table class="ref-info-table">
+                            <tr>
+                                <td class="ref-label" id="ref-card1-l1">건물용도</td>
+                                <td class="ref-value" id="ref-card1-v1">업무시설</td>
+                            </tr>
+                            <tr>
+                                <td class="ref-label" id="ref-card1-l2">규모</td>
+                                <td class="ref-value" id="ref-card1-v2">B1F/12F</td>
+                            </tr>
+                            <tr>
+                                <td class="ref-label" id="ref-card1-l3">적용물량</td>
+                                <td class="ref-value" id="ref-card1-v3">5,230톤 (전체층)</td>
+                            </tr>
+                            <tr>
+                                <td class="ref-label" id="ref-card1-l4">시공사</td>
+                                <td class="ref-value" id="ref-card1-v4">KCC건설</td>
+                            </tr>
+                            <tr>
+                                <td class="ref-label" id="ref-card1-l5">납품기간</td>
+                                <td class="ref-value" id="ref-card1-v5">2019.04 (6개월)</td>
+                            </tr>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- 17. 비상교육사옥 -->
+                <div class="reference-card">
+                    <img loading="lazy" width="1200" height="534" decoding="async" src="assets/images/9-2.webp" alt="비상교육사옥"
+                        style="width: 100%; height: 220px; object-fit: cover; display: block;">
+                    <div class="ref-content">
+                        <div class="ref-title" id="ref-card2-title">비상교육사옥</div>
+                        <table class="ref-info-table">
+                            <tr>
+                                <td class="ref-label" id="ref-card2-l1">건물용도</td>
+                                <td class="ref-value" id="ref-card2-v1">업무시설</td>
+                            </tr>
+                            <tr>
+                                <td class="ref-label" id="ref-card2-l2">규모</td>
+                                <td class="ref-value" id="ref-card2-v2">12F</td>
+                            </tr>
+                            <tr>
+                                <td class="ref-label" id="ref-card2-l3">적용물량</td>
+                                <td class="ref-value" id="ref-card2-v3">2,132톤</td>
+                            </tr>
+                            <tr>
+                                <td class="ref-label" id="ref-card2-l4">시공사</td>
+                                <td class="ref-value" id="ref-card2-v4">한라</td>
+                            </tr>
+                            <tr>
+                                <td class="ref-label" id="ref-card2-l5">납품기간</td>
+                                <td class="ref-value" id="ref-card2-v5">2023.07 (12개월)</td>
+                            </tr>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- 20. 안성방초2지구 물류창고 -->
+                <div class="reference-card">
+                    <img loading="lazy" width="1177" height="522" decoding="async" src="assets/images/9-3.webp" alt="안성방초2지구 물류창고"
+                        style="width: 100%; height: 220px; object-fit: cover; display: block;">
+                    <div class="ref-content">
+                        <div class="ref-title" id="ref-card3-title">안성방초2지구 물류창고</div>
+                        <table class="ref-info-table">
+                            <tr>
+                                <td class="ref-label" id="ref-card3-l1">건물용도</td>
+                                <td class="ref-value" id="ref-card3-v1">물류창고</td>
+                            </tr>
+                            <tr>
+                                <td class="ref-label" id="ref-card3-l2">규모</td>
+                                <td class="ref-value" id="ref-card3-v2">4F</td>
+                            </tr>
+                            <tr>
+                                <td class="ref-label" id="ref-card3-l3">적용물량</td>
+                                <td class="ref-value" id="ref-card3-v3">1,920톤 (지상 Ramp)</td>
+                            </tr>
+                            <tr>
+                                <td class="ref-label" id="ref-card3-l4">시공사</td>
+                                <td class="ref-value" id="ref-card3-v4">KCC건설</td>
+                            </tr>
+                            <tr>
+                                <td class="ref-label" id="ref-card3-l5">납품기간</td>
+                                <td class="ref-value" id="ref-card3-v5">2024.02 (6개월)</td>
+                            </tr>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- 15. 오산클라우드M 창고동 -->
+                <div class="reference-card">
+                    <img loading="lazy" width="1017" height="623" decoding="async" src="assets/images/9-4.webp" alt="오산클라우드M 창고동"
+                        style="width: 100%; height: 220px; object-fit: cover; display: block;">
+                    <div class="ref-content">
+                        <div class="ref-title" id="ref-card4-title">오산클라우드M 창고동</div>
+                        <table class="ref-info-table">
+                            <tr>
+                                <td class="ref-label" id="ref-card4-l1">건물용도</td>
+                                <td class="ref-value" id="ref-card4-v1">물류창고</td>
+                            </tr>
+                            <tr>
+                                <td class="ref-label" id="ref-card4-l2">규모</td>
+                                <td class="ref-value" id="ref-card4-v2">10F</td>
+                            </tr>
+                            <tr>
+                                <td class="ref-label" id="ref-card4-l3">적용물량</td>
+                                <td class="ref-value" id="ref-card4-v3">1,385톤</td>
+                            </tr>
+                            <tr>
+                                <td class="ref-label" id="ref-card4-l4">시공사</td>
+                                <td class="ref-value" id="ref-card4-v4">신한에스엔지</td>
+                            </tr>
+                            <tr>
+                                <td class="ref-label" id="ref-card4-l5">납품기간</td>
+                                <td class="ref-value" id="ref-card4-v5">2021.03 (6개월)</td>
+                            </tr>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- 11. 시저스코리아 복합리조트 -->
+                <div class="reference-card">
+                    <img loading="lazy" width="1160" height="705" decoding="async" src="assets/images/9-5.webp" alt="시저스코리아 복합리조트"
+                        style="width: 100%; height: 220px; object-fit: cover; display: block;">
+                    <div class="ref-content">
+                        <div class="ref-title" id="ref-card5-title">시저스코리아 복합리조트</div>
+                        <table class="ref-info-table">
+                            <tr>
+                                <td class="ref-label" id="ref-card5-l1">건물용도</td>
+                                <td class="ref-value" id="ref-card5-v1">복합시설</td>
+                            </tr>
+                            <tr>
+                                <td class="ref-label" id="ref-card5-l2">규모</td>
+                                <td class="ref-value" id="ref-card5-v2">B2F/27F</td>
+                            </tr>
+                            <tr>
+                                <td class="ref-label" id="ref-card5-l3">적용물량</td>
+                                <td class="ref-value" id="ref-card5-v3">1,295톤 (지상 2~6층)</td>
+                            </tr>
+                            <tr>
+                                <td class="ref-label" id="ref-card5-l4">시공사</td>
+                                <td class="ref-value" id="ref-card5-v4">쌍용건설</td>
+                            </tr>
+                            <tr>
+                                <td class="ref-label" id="ref-card5-l5">납품기간</td>
+                                <td class="ref-value" id="ref-card5-v5">2019.07 (4개월)</td>
+                            </tr>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- 5. 은평 롯데몰 -->
+                <div class="reference-card">
+                    <img loading="lazy" width="1200" height="654" decoding="async" src="assets/images/9-6.webp" alt="은평 롯데몰"
+                        style="width: 100%; height: 220px; object-fit: cover; display: block;">
+                    <div class="ref-content">
+                        <div class="ref-title" id="ref-card6-title">은평 롯데몰</div>
+                        <table class="ref-info-table">
+                            <tr>
+                                <td class="ref-label" id="ref-card6-l1">건물용도</td>
+                                <td class="ref-value" id="ref-card6-v1">판매시설</td>
+                            </tr>
+                            <tr>
+                                <td class="ref-label" id="ref-card6-l2">규모</td>
+                                <td class="ref-value" id="ref-card6-v2">B2F/9F</td>
+                            </tr>
+                            <tr>
+                                <td class="ref-label" id="ref-card6-l3">적용물량</td>
+                                <td class="ref-value" id="ref-card6-v3">1,146톤</td>
+                            </tr>
+                            <tr>
+                                <td class="ref-label" id="ref-card6-l4">시공사</td>
+                                <td class="ref-value" id="ref-card6-v4">롯데건설</td>
+                            </tr>
+                            <tr>
+                                <td class="ref-label" id="ref-card6-l5">납품기간</td>
+                                <td class="ref-value" id="ref-card6-v5">2015.11 (4개월)</td>
+                            </tr>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- 1. 동탄호수공원 주차타워 -->
+                <div class="reference-card">
+                    <img loading="lazy" width="1200" height="900" decoding="async" src="assets/images/9-7.webp" alt="동탄호수공원 주차타워"
+                        style="width: 100%; height: 220px; object-fit: cover; object-position: center 55%; display: block;">
+                    <div class="ref-content">
+                        <div class="ref-title" id="ref-card7-title">동탄호수공원 주차타워</div>
+                        <table class="ref-info-table">
+                            <tr>
+                                <td class="ref-label" id="ref-card7-l1">건물용도</td>
+                                <td class="ref-value" id="ref-card7-v1">주차장</td>
+                            </tr>
+                            <tr>
+                                <td class="ref-label" id="ref-card7-l2">규모</td>
+                                <td class="ref-value" id="ref-card7-v2">B2F/4F</td>
+                            </tr>
+                            <tr>
+                                <td class="ref-label" id="ref-card7-l3">적용물량</td>
+                                <td class="ref-value" id="ref-card7-v3">205톤</td>
+                            </tr>
+                            <tr>
+                                <td class="ref-label" id="ref-card7-l4">시공사</td>
+                                <td class="ref-value" id="ref-card7-v4">신동아건설</td>
+                            </tr>
+                            <tr>
+                                <td class="ref-label" id="ref-card7-l5">납품기간</td>
+                                <td class="ref-value" id="ref-card7-v5">2024.08</td>
+                            </tr>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- 9. 장기5 자주식주차장 -->
+                <div class="reference-card">
+                    <img loading="lazy" width="1200" height="540" decoding="async" src="assets/images/9-8.webp" alt="장기5 자주식주차장"
+                        style="width: 100%; height: 220px; object-fit: cover; display: block;">
+                    <div class="ref-content">
+                        <div class="ref-title" id="ref-card8-title">장기5 자주식주차장</div>
+                        <table class="ref-info-table">
+                            <tr>
+                                <td class="ref-label" id="ref-card8-l1">건물용도</td>
+                                <td class="ref-value" id="ref-card8-v1">주차장</td>
+                            </tr>
+                            <tr>
+                                <td class="ref-label" id="ref-card8-l2">규모</td>
+                                <td class="ref-value" id="ref-card8-v2">3F</td>
+                            </tr>
+                            <tr>
+                                <td class="ref-label" id="ref-card8-l3">적용물량</td>
+                                <td class="ref-value" id="ref-card8-v3">100톤</td>
+                            </tr>
+                            <tr>
+                                <td class="ref-label" id="ref-card8-l4">시공사</td>
+                                <td class="ref-value" id="ref-card8-v4">나엘건설산업</td>
+                            </tr>
+                            <tr>
+                                <td class="ref-label" id="ref-card8-l5">납품기간</td>
+                                <td class="ref-value" id="ref-card8-v5">2021.01</td>
+                            </tr>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 전체 실적 요약 테이블 -->
+            <div class="technical-box" style="margin-top: 50px;">
+                <h3 id="ref-summary-title" style="margin-bottom: 20px;">전체 실적 요약 (Summary)</h3>
+                <div style="overflow-x: auto;">
+                    <table
+                        style="width: 100%; font-size: 13px; text-align: left; border-collapse: collapse; min-width: 800px;">
+                        <thead>
+                            <tr style="border-bottom: 2px solid #d2d2d7; color: #86868b; background: #f5f5f7;">
+                                <th id="ref-th-date" style="padding: 12px;">준공연월</th>
+                                <th id="ref-th-name" style="padding: 12px;">프로젝트명</th>
+                                <th id="ref-th-usage" style="padding: 12px;">용도</th>
+                                <th id="ref-th-scale" style="padding: 12px;">규모</th>
+                                <th id="ref-th-qty" style="padding: 12px;">물량</th>
+                                <th id="ref-th-const" style="padding: 12px;">시공사</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr style="border-bottom: 1px solid #d2d2d7;">
+                                <td id="ref-tr16-c1">2027.01</td>
+                                <td id="ref-tr16-c2">퍼시스 베트남2공장 신축공사</td>
+                                <td id="ref-tr16-c3">공장시설</td>
+                                <td id="ref-tr16-c4">4F</td>
+                                <td id="ref-tr16-c5">2,427톤</td>
+                                <td id="ref-tr16-c6">MEGA D&C</td>
+                            </tr>
+                            <tr style="border-bottom: 1px solid #d2d2d7;">
+                                <td id="ref-tr20-c1">2026.12</td>
+                                <td id="ref-tr20-c2">JB금융그룹 사옥 신축공사</td>
+                                <td id="ref-tr20-c3">업무시설</td>
+                                <td id="ref-tr20-c4">B7F/19F</td>
+                                <td id="ref-tr20-c5">967톤</td>
+                                <td id="ref-tr20-c6">DL건설</td>
+                            </tr>
+                            <tr style="border-bottom: 1px solid #d2d2d7;">
+                                <td id="ref-tr17-c1">2026.11</td>
+                                <td id="ref-tr17-c2">대구 범어 자리오네 주상복합 신축공사</td>
+                                <td id="ref-tr17-c3">주상복합</td>
+                                <td id="ref-tr17-c4">B6F/39F</td>
+                                <td id="ref-tr17-c5">20.7톤</td>
+                                <td id="ref-tr17-c6">자이S&D</td>
+                            </tr>
+                            <tr style="border-bottom: 1px solid #d2d2d7;">
+                                <td id="ref-tr15-c1">2026.08</td>
+                                <td id="ref-tr15-c2">송추가마골 철골주차장</td>
+                                <td id="ref-tr15-c3">주차장</td>
+                                <td id="ref-tr15-c4">3F</td>
+                                <td id="ref-tr15-c5">65톤</td>
+                                <td id="ref-tr15-c6">다짐산업개발</td>
+                            </tr>
+                            <tr style="border-bottom: 1px solid #d2d2d7;">
+                                <td id="ref-tr18-c1">2026.05</td>
+                                <td id="ref-tr18-c2">수원당수 주상복합 신축공사</td>
+                                <td id="ref-tr18-c3">주상복합</td>
+                                <td id="ref-tr18-c4">B2F/25F</td>
+                                <td id="ref-tr18-c5">3.02톤</td>
+                                <td id="ref-tr18-c6">한라</td>
+                            </tr>
+                            <tr style="border-bottom: 1px solid #d2d2d7;">
+                                <td id="ref-tr19-c1">2026.05</td>
+                                <td id="ref-tr19-c2">성수동 스틱 업무시설 신축공사</td>
+                                <td id="ref-tr19-c3">업무시설</td>
+                                <td id="ref-tr19-c4">B7F/11F</td>
+                                <td id="ref-tr19-c5">247톤</td>
+                                <td id="ref-tr19-c6">KCC건설</td>
+                            </tr>
+                            <tr style="border-bottom: 1px solid #d2d2d7;">
+                                <td id="ref-tr1-c1">2024.08</td>
+                                <td id="ref-tr1-c2">동탄호수공원 주차타워</td>
+                                <td id="ref-tr1-c3">주차장</td>
+                                <td id="ref-tr1-c4">B2F/4F</td>
+                                <td id="ref-tr1-c5">205톤</td>
+                                <td id="ref-tr1-c6">신동아건설</td>
+                            </tr>
+                            <tr style="border-bottom: 1px solid #d2d2d7;">
+                                <td id="ref-tr2-c1">2024.03</td>
+                                <td id="ref-tr2-c2">용인공세 라피아노 신축공사</td>
+                                <td id="ref-tr2-c3">공동주택</td>
+                                <td id="ref-tr2-c4">B2F/1F</td>
+                                <td id="ref-tr2-c5">7.6톤</td>
+                                <td id="ref-tr2-c6">알비디케이콘스</td>
+                            </tr>
+                            <tr style="border-bottom: 1px solid #d2d2d7;">
+                                <td id="ref-tr3-c1">2024.02</td>
+                                <td id="ref-tr3-c2">안성방초2지구 물류창고</td>
+                                <td id="ref-tr3-c3">물류창고</td>
+                                <td id="ref-tr3-c4">4F</td>
+                                <td id="ref-tr3-c5">1,920톤</td>
+                                <td id="ref-tr3-c6">KCC건설</td>
+                            </tr>
+                            <tr style="border-bottom: 1px solid #d2d2d7;">
+                                <td id="ref-tr4-c1">2024.01</td>
+                                <td id="ref-tr4-c2">DRB 베트남2공장 혼련동</td>
+                                <td id="ref-tr4-c3">공장시설</td>
+                                <td id="ref-tr4-c4">4F</td>
+                                <td id="ref-tr4-c5">78톤</td>
+                                <td id="ref-tr4-c6">MEGA D&C</td>
+                            </tr>
+                            <tr style="border-bottom: 1px solid #d2d2d7;">
+                                <td id="ref-tr5-c1">2023.07</td>
+                                <td id="ref-tr5-c2">비상교육사옥</td>
+                                <td id="ref-tr5-c3">업무시설</td>
+                                <td id="ref-tr5-c4">12F</td>
+                                <td id="ref-tr5-c5">2,132톤</td>
+                                <td id="ref-tr5-c6">한라</td>
+                            </tr>
+                            <tr style="border-bottom: 1px solid #d2d2d7;">
+                                <td id="ref-tr6-c1">2023.01</td>
+                                <td id="ref-tr6-c2">GS THE FRESH 원주점 주차타워</td>
+                                <td id="ref-tr6-c3">주차장</td>
+                                <td id="ref-tr6-c4">3F</td>
+                                <td id="ref-tr6-c5">217톤</td>
+                                <td id="ref-tr6-c6">신한에스엔지</td>
+                            </tr>
+                            <tr style="border-bottom: 1px solid #d2d2d7;">
+                                <td id="ref-tr7-c1">2023.01</td>
+                                <td id="ref-tr7-c2">이천 안흥동 주상복합</td>
+                                <td id="ref-tr7-c3">주상복합</td>
+                                <td id="ref-tr7-c4">B7F/49F</td>
+                                <td id="ref-tr7-c5">52톤</td>
+                                <td id="ref-tr7-c6">제이에이치이엔지</td>
+                            </tr>
+                            <tr style="border-bottom: 1px solid #d2d2d7;">
+                                <td id="ref-tr8-c1">2021.03</td>
+                                <td id="ref-tr8-c2">오산클라우드M 창고동</td>
+                                <td id="ref-tr8-c3">물류창고</td>
+                                <td id="ref-tr8-c4">10F</td>
+                                <td id="ref-tr8-c5">1,385톤</td>
+                                <td id="ref-tr8-c6">신한에스엔지</td>
+                            </tr>
+                            <tr style="border-bottom: 1px solid #d2d2d7;">
+                                <td id="ref-tr9-c1">2021.01</td>
+                                <td id="ref-tr9-c2">장기5 자주식주차장</td>
+                                <td id="ref-tr9-c3">주차장</td>
+                                <td id="ref-tr9-c4">3F</td>
+                                <td id="ref-tr9-c5">100톤</td>
+                                <td id="ref-tr9-c6">나엘건설산업</td>
+                            </tr>
+                            <tr style="border-bottom: 1px solid #d2d2d7;">
+                                <td id="ref-tr10-c1">2019.04</td>
+                                <td id="ref-tr10-c2">평택 삼성전자 사무2동</td>
+                                <td id="ref-tr10-c3">업무시설</td>
+                                <td id="ref-tr10-c4">B1F/12F</td>
+                                <td id="ref-tr10-c5">5,230톤</td>
+                                <td id="ref-tr10-c6">KCC건설</td>
+                            </tr>
+                            <tr style="border-bottom: 1px solid #d2d2d7;">
+                                <td id="ref-tr11-c1">2018.03</td>
+                                <td id="ref-tr11-c2">제주공항 증축공사</td>
+                                <td id="ref-tr11-c3">공공시설</td>
+                                <td id="ref-tr11-c4">B1F/4F</td>
+                                <td id="ref-tr11-c5">581톤</td>
+                                <td id="ref-tr11-c6">금호건설</td>
+                            </tr>
+                            <tr style="border-bottom: 1px solid #d2d2d7;">
+                                <td id="ref-tr12-c1">2017.02</td>
+                                <td id="ref-tr12-c2">여의도 K타워</td>
+                                <td id="ref-tr12-c3">업무시설</td>
+                                <td id="ref-tr12-c4">B5F/15F</td>
+                                <td id="ref-tr12-c5">935톤</td>
+                                <td id="ref-tr12-c6">KCC건설</td>
+                            </tr>
+                            <tr style="border-bottom: 1px solid #d2d2d7;">
+                                <td id="ref-tr13-c1">2015.11</td>
+                                <td id="ref-tr13-c2">은평 롯데몰</td>
+                                <td id="ref-tr13-c3">판매시설</td>
+                                <td id="ref-tr13-c4">B2F/9F</td>
+                                <td id="ref-tr13-c5">1,146톤</td>
+                                <td id="ref-tr13-c6">롯데건설</td>
+                            </tr>
+                            <tr style="border-bottom: 1px solid #d2d2d7;">
+                                <td id="ref-tr14-c1">2013.01</td>
+                                <td id="ref-tr14-c2">동자동 쌍용 플래티넘</td>
+                                <td id="ref-tr14-c3">주상복합</td>
+                                <td id="ref-tr14-c4">B1F/28F</td>
+                                <td id="ref-tr14-c5">17톤</td>
+                                <td id="ref-tr14-c6">쌍용건설</td>
+                            </tr>
+
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-contact">
+                <span class="fc-label" id="footer-contact-label">기술 문의</span>
+                <a href="tel:0221689143">02-2168-9143</a>
+                <a href="mailto:kim.hee.hoon@drbworld.com">kim.hee.hoon@drbworld.com</a>
+            </div>
+            <p id="footer-conf"><strong>CONFIDENTIAL & PROPRIETARY</strong> - BESTOBEAM Technical Presentation Material</p>
+            <p id="footer-copy">본 자료는 기술 제안용으로 제작되었으며, 무단 전재 및 배포를 금합니다.</p>
+        </div>
+    </footer>
+
+    <div id="installModal" class="video-modal" onclick="closeInstallModal()">
+        <div class="modal-content" onclick="event.stopPropagation()">
+            <button class="close-btn" onclick="closeInstallModal()" aria-label="close">&times;</button>
+            <video id="installVideo" controls preload="none" playsinline poster="assets/images/install-poster.webp">
+                <source src="assets/videos/jeju-install.mp4" type="video/mp4">
+                <span id="install-video-error">브라우저가 동영상 재생을 지원하지 않습니다.</span>
+            </video>
+        </div>
+    </div>
+
+    <div id="videoModal" class="video-modal" onclick="closeVideoModal()">
+        <div class="modal-content" onclick="event.stopPropagation()">
+            <button class="close-btn" onclick="closeVideoModal()">&times;</button>
+            <video id="promoVideo" controls preload="none" playsinline poster="assets/images/promo-poster.webp">
+                <source src="assets/videos/250929_BESTOBEAM_HD.mp4" type="video/mp4">
+                <span id="video-error">브라우저가 동영상 재생을 지원하지 않습니다.</span>
+            </video>
+        </div>
+    </div>
+
+    <div id="youtubeModal" class="video-modal" onclick="closeYoutubeModal()">
+        <div class="modal-content" onclick="event.stopPropagation()">
+            <button class="close-btn" onclick="closeYoutubeModal()" aria-label="close">&times;</button>
+            <div class="youtube-frame">
+                <iframe id="youtubeFrame" src="" title="DRB 소개 영상" allowfullscreen
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                    referrerpolicy="strict-origin-when-cross-origin"></iframe>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const translations = {
+            'ko': {
+                'nav-overview': '제품 개요',
+                'nav-principle': '구조 설계 원리',
+                'nav-test': '실험 및 성능',
+                'nav-certification': '기술인증',
+                'nav-process': '시공 프로세스',
+                'nav-economy': '경제성 비교',
+                'nav-height': '층고 및 효율',
+                'nav-vibration': '진동 성능',
+                'nav-reference': '주요 실적',
+                'btn-design-text': 'BESTOBEAM 설계',
+                'btn-video-text': '홍보영상',
+                'btn-drb-text': 'DRB 소개',
+                'btn-np-text': 'NP Column',
+                'btn-pc-text': '중공PC기둥',
+                'overview-title': 'BESTOBEAM: <br>합성보의 장점과 시공 편의성의 결합.',
+
+                'overview-subhead': '『BEst Solution TO customer』 BEAM. H-section과 U-section의 하이브리드 설계로 시공성을 혁신합니다.',
+                'beam-def-title': '💡 보(Beam)란 무엇인가요?',
+                'beam-def-desc': '건물의 뼈대에서 <strong>가로(수평)로 놓여 바닥을 직접 받치는 핵심 부재</strong>입니다. 사람의 몸에 비유하면 척추와 연결되어 몸통을 지탱하는 \'갈비뼈\'와 같은 역할을 합니다. 바닥에 가해지는 모든 무게(사람, 가구 등)를 견디고 이를 다시 세로 기둥으로 전달하여 건물이 무너지지 않게 지탱하는 아주 중요한 뼈대입니다.',
+                'ov-econ-title': '1. 경제성',
+                'ov-econ-desc': '기존 철골보 대비 <strong>30~40% 강재량 절감</strong>. 장스팬 및 고하중 건물에서 경제성이 극대화됩니다.',
+                'ov-const-title': '2. 시공성',
+                'ov-const-desc': '기존 <strong>H형강 시공방법과 동일</strong>하여 현장 숙련도가 높고 공기 단축 및 품질 확보가 용이합니다.',
+                'ov-flex-title': '3. 융통성',
+                'ov-flex-desc': '<strong>역타공법(Top-Down)</strong>에도 적용이 용이하며, 기둥의 종류(철골, SRC, CFT 등)에 관계없이 설치 가능합니다.',
+                'ov-sust-title': '4. 지속가능성',
+                'ov-sust-desc': '<strong>층고 절감 효과</strong>와 재료 사용량 절감에 따른 탄소(CO2) 배출량 저감으로 친환경 건축을 실현합니다.',
+                
+                'comp-title': '베스토빔의 구성 및 사양 (사용강종: SM355 또는 동등 성능 강종)',
+                'comp-desc': '베스토빔은 정밀하게 가공된 각 부속 요소들의 결합을 통해 구조적 무결성을 유지합니다.',
+                'comp-h-label': 'H-단면 (End Section):',
+                'comp-u-label': 'U-단면 (Center Section):',
+                'comp-overlap-label': '겹침구간 (Overlap):',
+                'comp-angle-label': '앵글 (L-50X6):',
+                'comp-stud-label': '스터드 (Stud Bolt):',
+                'comp-stiffener-label': '보강판 (Stiffener):',
+                'comp-h': '<strong id="comp-h-label">H-단면 (End Section):</strong> 기둥 접합부의 전단력과 부모멘트를 부담.',
+                'comp-u': '<strong id="comp-u-label">U-단면 (Center Section):</strong> 콘크리트 충전 및 정모멘트 저항 구간.',
+                'comp-overlap': '<strong id="comp-overlap-label">겹침구간 (Overlap):</strong> 두 단면 사이의 힘을 안전하게 전달하는 전이 구간.',
+                'comp-angle': '<strong id="comp-angle-label">앵글 (L-50X6):</strong> U-단면 상부의 횡변위 제어 및 전단 연결재 역할.',
+                'comp-stud': '<strong id="comp-stud-label">스터드 (Stud Bolt):</strong> 보강판과 H-단면의 일체성 확보.',
+                'comp-stiffener': '<strong id="comp-stiffener-label">보강판 (Stiffener):</strong> 하중 집중 구간의 국부 좌굴 방지 및 강성 보강.',
+
+                'princ-title': '단면 설계 최적화 로직.',
+                'princ-subhead': '모멘트 크기에 따른 부재의 변동적 배치로 강재 효율을 극대화합니다.',
+                'princ-load-title': '하중 분포에 따른 단면 배치',
+                'princ-load-desc': '연속보에서 지점부(단부)는 큰 부모멘트(-)가 발생하며, 중앙부는 정모멘트(+)가 발생합니다. BESTOBEAM은 이 메커니즘을 정확히 추종합니다.',
+                'princ-load-end': '<strong>단부 (End Section):</strong> 부모멘트 저항에 유리한 H형강 플랜지 구조 적용.',
+                'princ-load-center': '<strong>중앙부 (Center Section):</strong> 콘크리트 충전 및 하부 인장력 저항에 최적화된 U형 단면 적용.',
+                'princ-proc-title': '구조 설계 프로세스',
+                'princ-proc-1': '1. 대상 구조물의 하중 분석 및 구조 해석 수행',
+                'princ-proc-2': '2. 위치별 최대 모멘트 및 전단력 산출',
+                'princ-proc-3': '3. BESTOBEAM 최적 단면(H-U 전환점) 산정 로직 적용',
+                'princ-proc-4': '4. 구조 검토서 생성 및 상세 설계 도면 작성',
+
+                'test-title': '실증적 검증: <br>RIST/KOLAS 인증 실험 결과.',
+                'test-subhead': '공인 기관의 엄격한 테스트를 통해 구조 성능과 안전성을 입증했습니다.',
+                'test-bend-title': '휨 성능 실험 (Bending Performance)',
+                'test-bend-desc': '설계 강도 대비 120% 이상의 내력을 발휘하며, 안정적인 하중-변위 곡선을 나타내어 구조적 신뢰성을 확보했습니다.',
+                'test-shear-title': '전단 연결재 거동 실험 (Shear Connector Test)',
+                'test-shear-desc': '단부 H형강과 중앙부 U형강의 접합부에서 발생하는 전단력 흐름의 연속성을 검증하여 일체형 거동을 확인했습니다.',
+                'test-seismic-title': '내진 성능 (Seismic Performance)',
+                'test-seismic-item1': '<strong>보-기둥 접합부 내진성능 실험 검증 :</strong> 반복 가력 실험을 통해 실제 지진 상황과 유사한 조건에서 접합부의 구조 안전성을 확인했습니다.',
+                'test-seismic-item2': '<strong>우수한 변형 능력 :</strong> <strong>3%~4%의 고연성도</strong> 접합부 회전능력을 확보하여 지진 에너지를 효과적으로 흡수할 수 있음을 입증했습니다.',
+
+                'cert-title': '기술인증 및 특허.',
+                'cert-subhead': '국내외 공인 기관을 통해 검증된 기술력으로 최상의 신뢰를 제공합니다.',
+                'cert-intel-title': '국내외 기술인증 및 지식재산권',
+                'cert-intel-desc': '건설신기술 지정을 포함하여 국내외 특허 및 구조기술사회의 엄격한 기술 검증을 완료했습니다.',
+                'cert-net': '<strong>건설신기술(NET) 지정 [제 835호]:</strong> 국토교통부 신기술 지정 (H형-U형 조합 합성보 공법)',
+                'cert-patents': '<strong>지식재산권 확보:</strong> 국내 특허 5건 및 미국 특허 등록을 통한 독자적 기술 보호',
+                'cert-ksea': '<strong>기술인증서 획득:</strong> (사)한국건축구조기술사회로부터 구조 시스템의 기술력 및 안전성 인증',
+                'cert-icc-title': '미국 ICC-ES 인증 획득',
+                'cert-icc-desc': '글로벌 건축물 설계 및 시공 기준을 충족하여 해외 시장에서의 기술적 신뢰성을 확보했습니다.',
+                'cert-icc-no': '<strong>인증번호:</strong> ESR-4134 (ICC-ES Evaluation Report)',
+                'cert-icc-verify': '<strong>검증내용:</strong> U-Shaped Steel-Concrete Composite Beam 시스템의 구조 성능 및 미국 건축법규(IBC) 적합성 검증',
+                'cert-icc-sig': '<strong>의의:</strong> 글로벌 수준의 구조 성능 및 안전성 입증',
+
+                'proc-title': '베스토빔 시공 혁신: <br>효율적 접합과 무거푸집 표준 공정.',
+                'proc-subhead': '기존 공법의 친숙한 접합 방식에 무거푸집 기술을 결합하여 공기 단축과 현장 안전성을 동시에 실현합니다.',
+                'proc-girder-title': 'Girder 접합 특징',
+                'proc-girder-item1': '<strong>접합방법은 기존 공사방법과 동일 :</strong> 현장 작업자들에게 친숙한 방식으로 공기 단축 가능',
+                'proc-girder-item2': '<strong>공장 제작(Angle) :</strong> 전단연결재인 앵글을 공장에서 미리 용접 제작하여 현장 시공이 기존보다 더 편리함',
+                'proc-beam-title': 'Beam 접합 특징',
+                'proc-beam-item1': '<strong>U형 브라켓 활용 :</strong> Girder에 U형 브라켓을 설치하여, Beam 설치 시 시공 편의성 증대 및 작업안전성 개선',
+                'proc-step-title': '표준 시공 순서',
+                'proc-step-1': '<strong>(1) Base Plate 및 철골 기둥 설치:</strong> 기초 베이스 플레이트 고정 및 기둥 하단 설치',
+                'proc-step-2': '<strong>(2) 철골 기둥 세우기:</strong> 상부 철골 기둥 인양 및 수직 조립',
+                'proc-step-3': '<strong>(3) Besto Composite Beam 설치:</strong> 기둥 사이 베스토 합성보 거치 및 접합',
+                'proc-step-4': '<strong>(4) Deck Plate 및 기둥 거푸집 설치:</strong> 슬래브용 데크플레이트 및 기둥 타설용 거푸집 배치',
+                'proc-step-5': '<strong>(5) Slab 및 하부 기둥 콘크리트 타설:</strong> 보/슬래브 내부 및 하부 기둥 동시 타설',
+                'proc-step-6': '<strong>(6) 상부 기둥 및 상부 Slab 콘크리트 타설:</strong> 구조물 일체화를 위한 상부층 타설 및 마감',
+                'proc-video-title': '현장 설치 영상 — 제주공항 증축공사',
+                'proc-video-desc': '실제 현장에서 베스토빔이 인양·거치되는 과정입니다. 기존 H형강과 동일한 접합 방식으로 진행되어 별도의 숙련 과정이 필요하지 않습니다.',
+                'proc-video-caption': '제주공항 증축공사 현장 — 베스토빔 설치 (1분 40초)',
+                'footer-contact-label': '기술 문의',
+
+                'econ-title': 'VE(Value Engineering) 사례: <br>데이터로 입증된 최적화 솔루션.',
+                'econ-subhead': '대표적인 두 가지 사례(숙박시설, 물류창고)를 통해 베스토빔의 실질적 경제성을 확인하십시오.',
+                'econ-case1-title': 'CASE 01. 숙박시설 VE 적용 사례 (2F~11F)',
+                'econ-case1-badge': '지상층 적용성 평가 완료',
+                'econ-case1-cond': '설계 조건 및 하중 계획:',
+                'econ-case1-dl': '고정하중(DL): 4.9 kN/m² (Slab THK. 150mm 기준)',
+                'econ-case1-ll': '활하중(LL): 3.5 kN/m² (업무 및 숙박 시설 기준)',
+                'econ-case1-th-cat': '구분',
+                'econ-case1-th-orig': '원안 (H-형강)',
+                'econ-case1-th-alt': '대안 (BESTOBEAM)',
+                'econ-case1-th-rate': '절감율',
+                'econ-case1-td-qty': '강재 물량 (층당)',
+                'econ-case1-td-cost': '공사비 (층당)',
+                'econ-case1-orig-cost': '98,425,690 원',
+                'econ-case1-alt-cost': '89,049,723 원',
+                'econ-case1-tip-title': '※ 엔지니어링 분석 포인트',
+                'econ-case1-tip-1': '• 경제성 검토 범위에는 접합부, 브라켓, 잭서포트가 포함되었습니다.',
+                'econ-case1-tip-2': '• 원안의 H형강이 최소화된 설계임에도 불구하고 <strong>약 28%의 추가 물량 절감</strong>을 달성했습니다.',
+                'econ-case1-tip-3': '• 보 중앙부 기준 <strong>50mm의 여유 높이</strong>를 확보하여 공간 효율을 높였습니다.',
+                'econ-case2-title': 'CASE 02. 대형 물류창고 VE 적용 사례',
+                'econ-case2-badge': '초고하중/장스팬 최적화',
+                'econ-case2-cond': '초고하중 설계 조건:',
+                'econ-case2-dl': '고정하중(DL): 6.62 kN/m² (Slab 180mm + 무근 100mm)',
+                'econ-case2-ll': '활하중(LL): 15.0 kN/m² (15m 구간은 24.0 kN/m² 적용)',
+                'econ-case2-span': '스팬 규모: 11.5m ~ 15.0m 장스팬 구조',
+                'econ-case1-th-cat2': '구분',
+                'econ-case1-th-orig2': '원안 (H-형강)',
+                'econ-case1-th-alt2': '대안 (BESTOBEAM)',
+                'econ-case1-th-rate2': '절감율',
+                'econ-case2-td-qty': '검토범위 물량',
+                'econ-case2-td-cost': '검토범위 공사비',
+                'econ-case2-orig-cost': '402,871,419 원',
+                'econ-case2-alt-cost': '338,684,232 원',
+                'econ-case2-tip-title': '※ 물류창고 특화 분석',
+                'econ-case2-tip-1': '• 보 높이 축소: 중앙부 기준 100~250mm의 보 춤을 축소하여 획기적인 층고 절감을 달성했습니다.',
+                'econ-case2-tip-2': '• 시공성 향상: 잭서포트가 필요 없는 설계로 공기 단축 및 시공비를 절감했습니다.',
+                'econ-case2-tip-3': '• 부재 효율화: 불필요한 보 부재(SB0 등)를 삭제하고 하이브리드 단면으로 대체하여 물량 29%를 절감했습니다.',
+
+
+                'height-title': '건축적 가치: <br>층고 절감 및 공간 창출.',
+                'height-subhead': '슬림해진 보 춤(Beam Depth)을 통해 건물 전체의 공간 효율을 극대화합니다.',
+                'height-box-title': '층당 200~400mm 층고 절감',
+                'height-box-desc': '결과: 동일 건물 높이에서 더 높은 천장고를 제공하거나 전체 층수를 늘려 분양 수익성을 높일 수 있습니다.',
+
+                'vib-title': '정숙한 환경을 위한 <br>진동 제어 기술.',
+                'vib-subhead': '콘크리트 충전 효과를 통한 강성 증대로 쾌적한 거주 환경을 제공합니다.',
+                'vib-box-title': '진동 특성 분석 및 성능 평가',
+                'vib-item1-title': '● 임팩트해머 가진을 통한 진동특성 분석',
+                'vib-item1-desc': '- 계측된 데이터를 바탕으로 해당 바닥의 고유진동수와 감쇠비 결정',
+                'vib-item2-title': '● 보행가진응답 측정 및 평가',
+                'vib-item2-desc': '- 가진에 따라 계측된 최대가속도를 바탕으로 AISC Design Guide 11을 통해 성능평가',
+                'vib-result': '<span style="font-size: 20px; margin-right: 8px;">➢</span> 평가 결과, 속보와 일반보행 모두 오피스 허용기준을 만족함',
+
+                'ref-title': '국내외 주요 프로젝트 <br>적용 실적.',
+                'ref-subhead': '2013년부터 현재까지 다양한 건축물에 적용되어 기술력을 증명하고 있습니다.',
+                'ref-summary-title': '전체 실적 요약 (Summary)',
+                'ref-th-date': '준공연월',
+                'ref-th-name': '프로젝트명',
+                'ref-th-usage': '용도',
+                'ref-th-scale': '규모',
+                'ref-th-qty': '물량',
+                'ref-th-const': '시공사',
+
+                'ref-card1-title': '평택 삼성전자 사무2동',
+                'ref-card1-l1': '건물용도', 'ref-card1-v1': '업무시설',
+                'ref-card1-l2': '규모', 'ref-card1-v2': 'B1F/12F',
+                'ref-card1-l3': '적용물량', 'ref-card1-v3': '5,230톤 (전체층)',
+                'ref-card1-l4': '시공사', 'ref-card1-v4': 'KCC건설',
+                'ref-card1-l5': '납품기간', 'ref-card1-v5': '2019.04 (6개월)',
+
+                'ref-card2-title': '비상교육사옥',
+                'ref-card2-l1': '건물용도', 'ref-card2-v1': '업무시설',
+                'ref-card2-l2': '규모', 'ref-card2-v2': '12F',
+                'ref-card2-l3': '적용물량', 'ref-card2-v3': '2,132톤',
+                'ref-card2-l4': '시공사', 'ref-card2-v4': '한라',
+                'ref-card2-l5': '납품기간', 'ref-card2-v5': '2023.07 (12개월)',
+
+                'ref-card3-title': '안성방초2지구 물류창고',
+                'ref-card3-l1': '건물용도', 'ref-card3-v1': '물류창고',
+                'ref-card3-l2': '규모', 'ref-card3-v2': '4F',
+                'ref-card3-l3': '적용물량', 'ref-card3-v3': '1,920톤 (지상 Ramp)',
+                'ref-card3-l4': '시공사', 'ref-card3-v4': 'KCC건설',
+                'ref-card3-l5': '납품기간', 'ref-card3-v5': '2024.02 (6개월)',
+
+                'ref-card4-title': '오산클라우드M 창고동',
+                'ref-card4-l1': '건물용도', 'ref-card4-v1': '물류창고',
+                'ref-card4-l2': '규모', 'ref-card4-v2': '10F',
+                'ref-card4-l3': '적용물량', 'ref-card4-v3': '1,385톤',
+                'ref-card4-l4': '시공사', 'ref-card4-v4': '신한에스엔지',
+                'ref-card4-l5': '납품기간', 'ref-card4-v5': '2021.03 (6개월)',
+
+                'ref-card5-title': '시저스코리아 복합리조트',
+                'ref-card5-l1': '건물용도', 'ref-card5-v1': '복합시설',
+                'ref-card5-l2': '규모', 'ref-card5-v2': 'B2F/27F',
+                'ref-card5-l3': '적용물량', 'ref-card5-v3': '1,295톤 (지상 2~6층)',
+                'ref-card5-l4': '시공사', 'ref-card5-v4': '쌍용건설',
+                'ref-card5-l5': '납품기간', 'ref-card5-v5': '2019.07 (4개월)',
+
+                'ref-card6-title': '은평 롯데몰',
+                'ref-card6-l1': '건물용도', 'ref-card6-v1': '판매시설',
+                'ref-card6-l2': '규모', 'ref-card6-v2': 'B2F/9F',
+                'ref-card6-l3': '적용물량', 'ref-card6-v3': '1,146톤',
+                'ref-card6-l4': '시공사', 'ref-card6-v4': '롯데건설',
+                'ref-card6-l5': '납품기간', 'ref-card6-v5': '2015.11 (4개월)',
+
+                'ref-card7-title': '동탄호수공원 주차타워',
+                'ref-card7-l1': '건물용도', 'ref-card7-v1': '주차장',
+                'ref-card7-l2': '규모', 'ref-card7-v2': 'B2F/4F',
+                'ref-card7-l3': '적용물량', 'ref-card7-v3': '205톤',
+                'ref-card7-l4': '시공사', 'ref-card7-v4': '신동아건설',
+                'ref-card7-l5': '납품기간', 'ref-card7-v5': '2024.08',
+
+                'ref-card8-title': '장기5 자주식주차장',
+                'ref-card8-l1': '건물용도', 'ref-card8-v1': '주차장',
+                'ref-card8-l2': '규모', 'ref-card8-v2': '3F',
+                'ref-card8-l3': '적용물량', 'ref-card8-v3': '100톤',
+                'ref-card8-l4': '시공사', 'ref-card8-v4': '나엘건설산업',
+                'ref-card8-l5': '납품기간', 'ref-card8-v5': '2021.01',
+
+                'ref-tr1-c2': '동탄호수공원 주차타워', 'ref-tr1-c3': '주차장', 'ref-tr1-c5': '205톤', 'ref-tr1-c6': '신동아건설',
+                'ref-tr2-c2': '용인공세 라피아노 신축공사', 'ref-tr2-c3': '공동주택', 'ref-tr2-c5': '7.6톤', 'ref-tr2-c6': '알비디케이콘스',
+                'ref-tr3-c2': '안성방초2지구 물류창고', 'ref-tr3-c3': '물류창고', 'ref-tr3-c5': '1,920톤', 'ref-tr3-c6': 'KCC건설',
+                'ref-tr4-c2': 'DRB 베트남2공장 혼련동', 'ref-tr4-c3': '공장시설', 'ref-tr4-c5': '78톤', 'ref-tr4-c6': 'MEGA D&C',
+                'ref-tr5-c2': '비상교육사옥', 'ref-tr5-c3': '업무시설', 'ref-tr5-c5': '2,132톤', 'ref-tr5-c6': '한라',
+                'ref-tr6-c2': 'GS THE FRESH 원주점 주차타워', 'ref-tr6-c3': '주차장', 'ref-tr6-c5': '217톤', 'ref-tr6-c6': '신한에스엔지',
+                'ref-tr7-c2': '이천 안흥동 주상복합', 'ref-tr7-c3': '주상복합', 'ref-tr7-c5': '52톤', 'ref-tr7-c6': '제이에이치이엔지',
+                'ref-tr8-c2': '오산클라우드M 창고동', 'ref-tr8-c3': '물류창고', 'ref-tr8-c5': '1,385톤', 'ref-tr8-c6': '신한에스엔지',
+                'ref-tr9-c2': '장기5 자주식주차장', 'ref-tr9-c3': '주차장', 'ref-tr9-c5': '100톤', 'ref-tr9-c6': '나엘건설산업',
+                'ref-tr10-c2': '평택 삼성전자 사무2동', 'ref-tr10-c3': '업무시설', 'ref-tr10-c5': '5,230톤', 'ref-tr10-c6': 'KCC건설',
+                'ref-tr11-c2': '제주공항 증축공사', 'ref-tr11-c3': '공공시설', 'ref-tr11-c5': '581톤', 'ref-tr11-c6': '금호건설',
+                'ref-tr12-c2': '여의도 K타워', 'ref-tr12-c3': '업무시설', 'ref-tr12-c5': '935톤', 'ref-tr12-c6': 'KCC건설',
+                'ref-tr13-c2': '은평 롯데몰', 'ref-tr13-c3': '판매시설', 'ref-tr13-c5': '1,146톤', 'ref-tr13-c6': '롯데건설',
+                'ref-tr14-c2': '동자동 쌍용 플래티넘', 'ref-tr14-c3': '주상복합', 'ref-tr14-c5': '17톤', 'ref-tr14-c6': '쌍용건설',
+                'ref-tr15-c1': '2026.08', 'ref-tr15-c2': '송추가마골 철골주차장', 'ref-tr15-c3': '주차장', 'ref-tr15-c5': '65톤', 'ref-tr15-c6': '다짐산업개발',
+                'ref-tr16-c1': '2027.01', 'ref-tr16-c2': '퍼시스 베트남2공장 신축공사', 'ref-tr16-c3': '공장시설', 'ref-tr16-c5': '2,427톤', 'ref-tr16-c6': 'MEGA D&C',
+                'ref-tr17-c1': '2026.11', 'ref-tr17-c2': '대구 범어 자리오네 주상복합 신축공사', 'ref-tr17-c3': '주상복합', 'ref-tr17-c5': '20.7톤', 'ref-tr17-c6': '자이S&D',
+                'ref-tr18-c1': '2026.05', 'ref-tr18-c2': '수원당수 주상복합 신축공사', 'ref-tr18-c3': '주상복합', 'ref-tr18-c5': '3.02톤', 'ref-tr18-c6': '한라',
+                'ref-tr19-c1': '2026.05', 'ref-tr19-c2': '성수동 스틱 업무시설 신축공사', 'ref-tr19-c3': '업무시설', 'ref-tr19-c5': '247톤', 'ref-tr19-c6': 'KCC건설',
+                'ref-tr20-c1': '2026.12', 'ref-tr20-c2': 'JB금융그룹 사옥 신축공사', 'ref-tr20-c3': '업무시설', 'ref-tr20-c5': '967톤', 'ref-tr20-c6': 'DL건설',
+
+
+
+
+                'footer-conf': '<strong>CONFIDENTIAL & PROPRIETARY</strong> - BESTOBEAM Technical Presentation Material',
+                'footer-copy': '본 자료는 기술 제안용으로 제작되었으며, 무단 전재 및 배포를 금합니다.'
+            },
+            'en': {
+                'nav-overview': 'Overview',
+                'nav-principle': 'Principles',
+                'nav-test': 'Performance',
+                'nav-certification': 'Certifications',
+                'nav-process': 'Process',
+                'nav-economy': 'Economy',
+                'nav-height': 'Floor Height',
+                'nav-vibration': 'Vibration',
+                'nav-reference': 'References',
+                'btn-design-text': 'BESTOBEAM Design',
+                'btn-video-text': 'Promotion Video',
+                'btn-drb-text': 'About DRB',
+                'btn-np-text': 'NP Column',
+                'btn-pc-text': 'Hollow PC Column',
+                'overview-title': 'BESTOBEAM: <br>Advantage of Composite Beams & Ease of Construction.',
+                'overview-subhead': '『BEst Solution TO customer』 BEAM. Innovating construction with a hybrid H/U-section design.',
+                'beam-def-title': '💡 What is a Beam?',
+                'beam-def-desc': 'A key horizontal member in a building\'s skeleton that directly supports the floor. Like ribs supporting the torso, beams bear floor weight (people, furniture, etc.) and transfer it to columns, ensuring structural stability.',
+                'ov-econ-title': '1. Economy',
+                'ov-econ-desc': '<strong>30-40% reduction in steel quantity</strong> compared to conventional beams. Maximizes efficiency in long-span and high-load buildings.',
+                'ov-const-title': '2. Constructability',
+                'ov-const-desc': '<strong>Same as conventional H-beam methods</strong>, ensuring high field proficiency, shortening schedules, and securing quality.',
+                'ov-flex-title': '3. Flexibility',
+                'ov-flex-desc': 'Easy to apply in <strong>Top-Down methods</strong>, and compatible with various column types (Steel, SRC, CFT, etc.).',
+                'ov-sust-title': '4. Sustainability',
+                'ov-sust-desc': 'Achieves eco-friendly construction through <strong>floor height reduction</strong> and reduced carbon emissions by saving materials.',
+                
+                'comp-title': 'Composition & Specs (Steel Grade: SM355 or equivalent)',
+                'comp-desc': 'BESTOBEAM maintains structural integrity through the combination of precisely processed components.',
+                'comp-h-label': 'H-Section (End Section):',
+                'comp-u-label': 'U-Section (Center Section):',
+                'comp-overlap-label': 'Overlap:',
+                'comp-angle-label': 'Angle (L-50X6):',
+                'comp-stud-label': 'Stud Bolt:',
+                'comp-stiffener-label': 'Stiffener:',
+                'comp-h': '<strong id="comp-h-label">H-Section (End Section):</strong> Bears shear force and negative moment at column joints.',
+                'comp-u': '<strong id="comp-u-label">U-Section (Center Section):</strong> Concrete filling and positive moment resistance section.',
+                'comp-overlap': '<strong id="comp-overlap-label">Overlap:</strong> Transition section for safe force transfer between two sections.',
+                'comp-angle': '<strong id="comp-angle-label">Angle (L-50X6):</strong> Lateral displacement control and shear connector functionality on top of U-section.',
+                'comp-stud': '<strong id="comp-stud-label">Stud Bolt:</strong> Ensures monolithic behavior between stiffeners and H-section.',
+                'comp-stiffener': '<strong id="comp-stiffener-label">Stiffener:</strong> Prevents local buckling and reinforces stiffness in load concentration areas.',
+
+                'princ-title': 'Section Design Optimization.',
+                'princ-subhead': 'Maximizes steel efficiency through variable placement based on moment magnitude.',
+                'princ-load-title': 'Section Placement by Load Distribution',
+                'princ-load-desc': 'In continuous beams, ends experience negative moments (-), while the center experiences positive moments (+). BESTOBEAM precisely follows this mechanism.',
+                'princ-load-end': '<strong>End Section:</strong> H-beam flange structure advantageous for negative moment resistance.',
+                'princ-load-center': '<strong>Center Section:</strong> U-shaped section optimized for concrete filling and tensile resistance.',
+                'princ-proc-title': 'Structural Design Process',
+                'princ-proc-1': '1. Load and structural analysis of the target structure.',
+                'princ-proc-2': '2. Calculation of maximum moments and shear forces by location.',
+                'princ-proc-3': '3. Application of BESTOBEAM optimal section (H-U transition) logic.',
+                'princ-proc-4': '4. Generation of structural reports and detailed design drawings.',
+
+                'test-title': 'Verification: <br>RIST/KOLAS Certified Test Results.',
+                'test-subhead': 'Structural performance and safety proven through rigorous testing by authorized institutions.',
+                'test-bend-title': 'Bending Performance Test',
+                'test-bend-desc': 'Exhibits over 120% of design strength with stable load-displacement curves, ensuring reliability.',
+                'test-shear-title': 'Shear Connector Behavior Test',
+                'test-shear-desc': 'Verified monolithic behavior and continuous shear flow at the H-U joint.',
+                'test-seismic-title': 'Seismic Performance',
+                'test-seismic-item1': '<strong>Joint Verification:</strong> Safety confirmed under earthquake-like conditions via cyclic loading tests.',
+                'test-seismic-item2': '<strong>Deformation Capacity:</strong> Effectively absorbs energy with high ductility (3-4%+).',
+                'cert-title': 'Certifications & Patents.',
+                'cert-subhead': 'Providing the highest reliability with verified technology.',
+                'cert-intel-title': 'Technical Certifications',
+                'cert-intel-desc': 'Rigorous technical verification via NET designation and international patents.',
+                'cert-net': '<strong>NET Designation [#835]:</strong> Designated by MOLIT (H-U hybrid composite beam).',
+                'cert-patents': '<strong>Intellectual Property:</strong> 5 domestic patents and US patent registration.',
+                'cert-ksea': '<strong>Certification:</strong> Structural safety certified by the KSEA.',
+                'cert-icc-title': 'US ICC-ES Certification',
+                'cert-icc-desc': 'Secured reliability in global markets by meeting international building standards.',
+                'cert-icc-no': '<strong>Certification No.:</strong> ESR-4134 (ICC-ES Evaluation Report)',
+                'cert-icc-verify': '<strong>Verification:</strong> Structural performance of U-Shaped Composite Beam and IBC compliance.',
+                'cert-icc-sig': '<strong>Significance:</strong> Global-level verification of structural performance and safety.',
+                'proc-title': 'Innovation: <br>Efficient Joints & Formwork-free Process.',
+                'proc-subhead': 'Combines familiar joining methods with formwork-free tech for schedule reduction.',
+                'proc-girder-title': 'Girder Connection Features',
+                'proc-girder-item1': '<strong>Same as Conventional:</strong> Familiarity for workers prevents errors and reduces schedules.',
+                'proc-girder-item2': '<strong>Factory Fabrication:</strong> Pre-welded shear angles for maximum site convenience.',
+                'proc-beam-title': 'Beam Connection Features',
+                'proc-beam-item1': '<strong>U-shaped Brackets:</strong> Installed on girders for improved beam installation safety and ease.',
+                'proc-step-title': 'Standard Construction Sequence',
+                'proc-step-1': '<strong>(1) Base Plate & Column Installation:</strong> Foundation plate and first column setup.',
+                'proc-step-2': '<strong>(2) Column Erection:</strong> Vertical assembly of upper steel columns.',
+                'proc-step-3': '<strong>(3) BESTOBEAM Installation:</strong> Positioning and joining of the composite beams.',
+                'proc-step-4': '<strong>(4) Deck Plate & Formwork:</strong> Slab deck and column formwork placement.',
+                'proc-step-5': '<strong>(5) Slab & Lower Column Pouring:</strong> Simultaneous pouring in beams/slabs and lower columns.',
+                'proc-step-6': '<strong>(6) Upper Column & Slab Pouring:</strong> Final layer pouring for structural integration.',
+                'proc-video-title': 'On-Site Installation — Jeju Airport Extension',
+                'proc-video-desc': 'BESTOBEAM being lifted and placed on an actual site. The same connection method as conventional H-beams, requiring no additional training.',
+                'proc-video-caption': 'Jeju Airport Extension — BESTOBEAM installation (1 min 40 sec)',
+                'footer-contact-label': 'CONTACT',
+                'econ-title': 'VE(Value Engineering) Case Studies: <br>Optimization Solutions Proven by Data.',
+                'econ-subhead': 'Verify the practical economic efficiency of BESTOBEAM through two representative cases (Residential/Hotel, Warehouse).',
+                'econ-case1-title': 'CASE 01. Residential/Hotel VE Case (2F~11F)',
+                'econ-case1-badge': 'Ground Floor Applicability Evaluation Completed',
+                'econ-case1-cond': 'Design Conditions & Load Planning:',
+                'econ-case1-dl': 'Dead Load (DL): 4.9 kN/m² (Based on 150mm Slab THK.)',
+                'econ-case1-ll': 'Live Load (LL): 3.5 kN/m² (Based on Office/Hotel standards)',
+                'econ-case1-th-cat': 'Category',
+                'econ-case1-th-orig': 'Original (H-Beam)',
+                'econ-case1-th-alt': 'Alternative (BESTOBEAM)',
+                'econ-case1-th-rate': 'Reduction Rate',
+                'econ-case1-td-qty': 'Steel Quantity (per floor)',
+                'econ-case1-td-cost': 'Construction Cost (per floor)',
+                'econ-case1-orig-cost': '98,425,690 KRW',
+                'econ-case1-alt-cost': '89,049,723 KRW',
+                'econ-case1-tip-title': '※ Engineering Analysis Points',
+                'econ-case1-tip-1': '• The scope of economic review includes joints, brackets, and jack supports.',
+                'econ-case1-tip-2': '• Achieved an additional 28% steel quantity reduction even though the original H-beam design was already minimized.',
+                'econ-case1-tip-3': '• Secured 50mm of extra ceiling height based on the beam center to improve space efficiency.',
+                'econ-case2-title': 'CASE 02. Large-scale Warehouse VE Case',
+                'econ-case2-badge': 'Ultra-high Load/Long-span Optimization',
+                'econ-case2-cond': 'Ultra-high Load Design Conditions:',
+                'econ-case2-dl': 'Dead Load (DL): 6.62 kN/m² (Slab 180mm + Unreinforced 100mm)',
+                'econ-case2-ll': 'Live Load (LL): 15.0 kN/m² (Apply 24.0 kN/m² for 15m sections)',
+                'econ-case2-span': 'Span Scale: 11.5m ~ 15.0m Long-span structure',
+                'econ-case1-th-cat2': 'Category',
+                'econ-case1-th-orig2': 'Original (H-Beam)',
+                'econ-case1-th-alt2': 'Alternative (BESTOBEAM)',
+                'econ-case1-th-rate2': 'Reduction Rate',
+                'econ-case2-td-qty': 'Steel Quantity (Review Scope)',
+                'econ-case2-td-cost': 'Construction Cost (Review Scope)',
+                'econ-case2-orig-cost': '402,871,419 KRW',
+                'econ-case2-alt-cost': '338,684,232 KRW',
+                'econ-case2-tip-title': '※ Warehouse-specific Analysis',
+                'econ-case2-tip-1': '• Beam Height Reduction: Achieved breakthrough floor height reduction by reducing beam depth by 100~250mm at the center.',
+                'econ-case2-tip-2': '• Improved Constructability: Reduced schedule and costs with a design that eliminates the need for jack supports.',
+                'econ-case2-tip-3': '• Member Optimization: Deleted unnecessary beam members (SB0, etc.) and replaced them with hybrid sections, reducing steel quantity by 29%.',
+                'height-title': 'Architectural Value: <br>Floor Height Reduction.',
+                'height-subhead': 'Maximizes space efficiency through slimmed-down beam depth.',
+                'height-box-title': '200~400mm Floor Height Reduction',
+                'height-box-desc': 'Result: Provides higher ceiling heights or increases total floors to improve profitability.',
+
+                'vib-title': 'Vibration Control <br>for a Quiet Environment.',
+                'vib-subhead': 'Provides a pleasant environment through increased stiffness via concrete filling.',
+                'vib-box-title': 'Vibration Analysis & Evaluation',
+                'vib-item1-title': '● Vibration Analysis via Impact Hammer',
+                'vib-item1-desc': '- natural frequency and damping ratio determination based on measured data.',
+                'vib-item2-title': '● Evaluation of Walking Excitation',
+                'vib-item2-desc': '- performance evaluation based on maximum acceleration using AISC Design Guide 11.',
+
+                'ref-card1-title': 'Samsung Electronics Pyeongtaek Office 2',
+                'ref-card1-l1': 'Building Usage', 'ref-card1-v1': 'Office',
+                'ref-card1-l2': 'Scale', 'ref-card1-v2': 'B1F/12F',
+                'ref-card1-l3': 'Applied Qty', 'ref-card1-v3': '5,230 tons (All floors)',
+                'ref-card1-l4': 'Contractor', 'ref-card1-v4': 'KCC Construction',
+                'ref-card1-l5': 'Delivery', 'ref-card1-v5': '2019.04 (6 mo)',
+
+                'ref-card2-title': 'Visang Education Headquarters',
+                'ref-card2-l1': 'Building Usage', 'ref-card2-v1': 'Office',
+                'ref-card2-l2': 'Scale', 'ref-card2-v2': '12F',
+                'ref-card2-l3': 'Applied Qty', 'ref-card2-v3': '2,132 tons',
+                'ref-card2-l4': 'Contractor', 'ref-card2-v4': 'HL-Halla',
+                'ref-card2-l5': 'Delivery', 'ref-card2-v5': '2023.07 (12 mo)',
+
+                'ref-card3-title': 'Anseong Bangcho 2 Logistics Center',
+                'ref-card3-l1': 'Building Usage', 'ref-card3-v1': 'Warehouse',
+                'ref-card3-l2': 'Scale', 'ref-card3-v2': '4F',
+                'ref-card3-l3': 'Applied Qty', 'ref-card3-v3': '1,920 tons (Ground Ramp)',
+                'ref-card3-l4': 'Contractor', 'ref-card3-v4': 'KCC Construction',
+                'ref-card3-l5': 'Delivery', 'ref-card3-v5': '2024.02 (6 mo)',
+
+                'ref-card4-title': 'Osan Cloud M Warehouse',
+                'ref-card4-l1': 'Building Usage', 'ref-card4-v1': 'Warehouse',
+                'ref-card4-l2': 'Scale', 'ref-card4-v2': '10F',
+                'ref-card4-l3': 'Applied Qty', 'ref-card4-v3': '1,385 tons',
+                'ref-card4-l4': 'Contractor', 'ref-card4-v4': 'Shinhan S&G',
+                'ref-card4-l5': 'Delivery', 'ref-card4-v5': '2021.03 (6 mo)',
+
+                'ref-card5-title': 'Caesars Korea Integrated Resort',
+                'ref-card5-l1': 'Building Usage', 'ref-card5-v1': 'Complex Facility',
+                'ref-card5-l2': 'Scale', 'ref-card5-v2': 'B2F/27F',
+                'ref-card5-l3': 'Applied Qty', 'ref-card5-v3': '1,295 tons (2~6F)',
+                'ref-card5-l4': 'Contractor', 'ref-card5-v4': 'Ssangyong Engineering',
+                'ref-card5-l5': 'Delivery', 'ref-card5-v5': '2019.07 (4 mo)',
+
+                'ref-card6-title': 'Lotte Mall Eunpyeong',
+                'ref-card6-l1': 'Building Usage', 'ref-card6-v1': 'Retail Facility',
+                'ref-card6-l2': 'Scale', 'ref-card6-v2': 'B2F/9F',
+                'ref-card6-l3': 'Applied Qty', 'ref-card6-v3': '1,146 tons',
+                'ref-card6-l4': 'Contractor', 'ref-card6-v4': 'Lotte Construction',
+                'ref-card6-l5': 'Delivery', 'ref-card6-v5': '2015.11 (4 mo)',
+
+                'ref-card7-title': 'Dongtan Lake Park Parking Tower',
+                'ref-card7-l1': 'Building Usage', 'ref-card7-v1': 'Parking Lot',
+                'ref-card7-l2': 'Scale', 'ref-card7-v2': 'B2F/4F',
+                'ref-card7-l3': 'Applied Qty', 'ref-card7-v3': '205 tons',
+                'ref-card7-l4': 'Contractor', 'ref-card7-v4': 'Shindongah Cons.',
+                'ref-card7-l5': 'Delivery', 'ref-card7-v5': '2024.08',
+
+                'ref-card8-title': 'Janggi 5 Parking Lot',
+                'ref-card8-l1': 'Building Usage', 'ref-card8-v1': 'Parking Lot',
+                'ref-card8-l2': 'Scale', 'ref-card8-v2': '3F',
+                'ref-card8-l3': 'Applied Qty', 'ref-card8-v3': '100 tons',
+                'ref-card8-l4': 'Contractor', 'ref-card8-v4': 'Nael Cons.',
+                'ref-card8-l5': 'Delivery', 'ref-card8-v5': '2021.01',
+
+                'ref-tr1-c2': 'Dongtan Lake Park Parking Tower', 'ref-tr1-c3': 'Parking Lot', 'ref-tr1-c5': '205 tons', 'ref-tr1-c6': 'Shindongah Cons.',
+                'ref-tr2-c2': 'Yongin Gongse Lafiano', 'ref-tr2-c3': 'Residential', 'ref-tr2-c5': '7.6 tons', 'ref-tr2-c6': 'RBDK Cons.',
+                'ref-tr3-c2': 'Anseong Bangcho 2 Logistics Center', 'ref-tr3-c3': 'Warehouse', 'ref-tr3-c5': '1,920 tons', 'ref-tr3-c6': 'KCC Cons.',
+                'ref-tr4-c2': 'DRB Vietnam Factory 2', 'ref-tr4-c3': 'Factory', 'ref-tr4-c5': '78 tons', 'ref-tr4-c6': 'MEGA D&C',
+                'ref-tr5-c2': 'Visang Education Headquarters', 'ref-tr5-c3': 'Office', 'ref-tr5-c5': '2,132 tons', 'ref-tr5-c6': 'HL-Halla',
+                'ref-tr6-c2': 'GS THE FRESH Wonju Parking Tower', 'ref-tr6-c3': 'Parking Lot', 'ref-tr6-c5': '217 tons', 'ref-tr6-c6': 'Shinhan S&G',
+                'ref-tr7-c2': 'Icheon Anheung-dong Complex', 'ref-tr7-c3': 'Mixed-use', 'ref-tr7-c5': '52 tons', 'ref-tr7-c6': 'JH Eng.',
+                'ref-tr8-c2': 'Osan Cloud M Warehouse', 'ref-tr8-c3': 'Warehouse', 'ref-tr8-c5': '1,385 tons', 'ref-tr8-c6': 'Shinhan S&G',
+                'ref-tr9-c2': 'Janggi 5 Parking Lot', 'ref-tr9-c3': 'Parking Lot', 'ref-tr9-c5': '100 tons', 'ref-tr9-c6': 'Nael Cons.',
+                'ref-tr10-c2': 'Samsung Electronics Pyeongtaek Office 2', 'ref-tr10-c3': 'Office', 'ref-tr10-c5': '5,230 tons', 'ref-tr10-c6': 'KCC Cons.',
+                'ref-tr11-c2': 'Jeju Airport Extension', 'ref-tr11-c3': 'Public', 'ref-tr11-c5': '581 tons', 'ref-tr11-c6': 'Kumho Cons.',
+                'ref-tr12-c2': 'Yeouido K-Tower', 'ref-tr12-c3': 'Office', 'ref-tr12-c5': '935 tons', 'ref-tr12-c6': 'KCC Cons.',
+                'ref-tr13-c2': 'Lotte Mall Eunpyeong', 'ref-tr13-c3': 'Retail', 'ref-tr13-c5': '1,146 tons', 'ref-tr13-c6': 'Lotte Cons.',
+                'ref-tr14-c2': 'Dongjadong Ssangyong Platinum', 'ref-tr14-c3': 'Mixed-use', 'ref-tr14-c5': '17 tons', 'ref-tr14-c6': 'Ssangyong Cons.',
+                'ref-tr15-c1': '2026.08', 'ref-tr15-c2': 'Songchu Gamagol Steel Parking Structure', 'ref-tr15-c3': 'Parking Lot', 'ref-tr15-c5': '65 tons', 'ref-tr15-c6': 'Dajim Industrial Dev.',
+                'ref-tr16-c1': '2027.01', 'ref-tr16-c2': 'Fursys Vietnam Factory 2', 'ref-tr16-c3': 'Factory', 'ref-tr16-c5': '2,427 tons', 'ref-tr16-c6': 'MEGA D&C',
+                'ref-tr17-c1': '2026.11', 'ref-tr17-c2': 'Daegu Beomeo Jarione Mixed-use Complex', 'ref-tr17-c3': 'Mixed-use', 'ref-tr17-c5': '20.7 tons', 'ref-tr17-c6': 'Xi S&D',
+                'ref-tr18-c1': '2026.05', 'ref-tr18-c2': 'Suwon Dangsu Mixed-use Complex', 'ref-tr18-c3': 'Mixed-use', 'ref-tr18-c5': '3.02 tons', 'ref-tr18-c6': 'HL-Halla',
+                'ref-tr19-c1': '2026.05', 'ref-tr19-c2': 'Seongsu-dong STIC Office Building', 'ref-tr19-c3': 'Office', 'ref-tr19-c5': '247 tons', 'ref-tr19-c6': 'KCC Cons.',
+                'ref-tr20-c1': '2026.12', 'ref-tr20-c2': 'JB Financial Group Headquarters', 'ref-tr20-c3': 'Office', 'ref-tr20-c5': '967 tons', 'ref-tr20-c6': 'DL Cons.',
+
+
+
+                'vib-result': '<span style="font-size: 20px; margin-right: 8px;">➢</span> Result: Satisfied office allowance standards for both walking types.',
+
+                'ref-title': 'Global Project <br>References.',
+                'ref-subhead': 'Applied to various structures since 2013, proving technical excellence.',
+                'ref-summary-title': 'Project Summary Table',
+                'ref-th-date': 'Completion',
+                'ref-th-name': 'Project Name',
+                'ref-th-usage': 'Usage',
+                'ref-th-scale': 'Scale',
+                'ref-th-qty': 'Quantity',
+                'ref-th-const': 'Contractor',
+
+                'footer-conf': '<strong>CONFIDENTIAL & PROPRIETARY</strong> - BESTOBEAM Technical Presentation Material',
+                'footer-copy': 'Unauthorized reproduction or distribution is prohibited.'
+            },
+            'zh': {
+                'nav-overview': '产品概要',
+                'nav-principle': '结构设计原理',
+                'nav-test': '试验与性能',
+                'nav-certification': '技术认证',
+                'nav-process': '施工工艺',
+                'nav-economy': '经济性比较',
+                'nav-height': '层高与效率',
+                'nav-vibration': '振动性能',
+                'nav-reference': '主要业绩',
+                'btn-design-text': 'BESTOBEAM 设计',
+                'btn-video-text': '宣传视频',
+                'btn-drb-text': 'DRB 简介',
+                'btn-np-text': 'NP Column',
+                'btn-pc-text': '中空PC柱',
+                'overview-title': 'BESTOBEAM: <br>组合梁优势与施工便捷性的完美结合。',
+                'overview-subhead': '『BEst Solution TO customer』 BEAM。通过H型截面与U型截面的混合设计，革新施工效率。',
+                'beam-def-title': '💡 什么是梁（Beam）？',
+                'beam-def-desc': '梁是建筑骨架中<strong>水平放置、直接支撑楼板的核心构件</strong>。用人体作比喻，它就像连接脊柱支撑躯体的"肋骨"一样。它承受楼板上的所有荷载（人员、家具等），并将其传递给竖向柱体，是保证建筑不倒塌的至关重要的骨架构件。',
+                'ov-econ-title': '1. 经济性（Economy）',
+                'ov-econ-desc': '与传统钢梁相比，<strong>钢材用量减少30~40%</strong>。在大跨度和高荷载建筑中，经济效益最大化。',
+                'ov-const-title': '2. 施工便捷性（Constructability）',
+                'ov-const-desc': '与传统<strong>H型钢施工方法完全相同</strong>，现场熟练度高，便于缩短工期并确保施工质量。',
+                'ov-flex-title': '3. 灵活性（Flexibility）',
+                'ov-flex-desc': '同样适用于<strong>逆作法（Top-Down）</strong>，且不受柱体类型（钢结构、SRC、CFT等）限制均可安装。',
+                'ov-sust-title': '4. 可持续性（Sustainability）',
+                'ov-sust-desc': '通过<strong>层高缩减效果</strong>和材料用量减少所带来的碳排放降低，实现绿色建筑。',
+                
+                'comp-title': 'BESTOBEAM 构成及规格（使用钢种：SM355或同等性能钢种）',
+                'comp-desc': 'BESTOBEAM 通过精密加工的各组件结合，维持结构完整性。',
+                'comp-h-label': 'H型截面（End Section）：',
+                'comp-u-label': 'U型截面（Center Section）：',
+                'comp-overlap-label': '搭接区间（Overlap）：',
+                'comp-angle-label': '角钢（L-50X6）：',
+                'comp-stud-label': '栓钉（Stud Bolt）：',
+                'comp-stiffener-label': '加劲板（Stiffener）：',
+                'comp-h': '<strong id="comp-h-label">H型截面（End Section）：</strong>承担柱接合部的剪力和负弯矩。',
+                'comp-u': '<strong id="comp-u-label">U型截面（Center Section）：</strong>混凝土填充及正弯矩抵抗区段。',
+                'comp-overlap': '<strong id="comp-overlap-label">搭接区间（Overlap）：</strong>在两种截面之间安全传递力的过渡区段。',
+                'comp-angle': '<strong id="comp-angle-label">角钢（L-50X6）：</strong>U型截面顶部的横向位移控制及剪力连接件作用。',
+                'comp-stud': '<strong id="comp-stud-label">栓钉（Stud Bolt）：</strong>确保加劲板与H型截面的整体性。',
+                'comp-stiffener': '<strong id="comp-stiffener-label">加劲板（Stiffener）：</strong>防止荷载集中区段的局部屈曲并增强刚度。',
+
+                'princ-title': '截面设计优化逻辑。',
+                'princ-subhead': '根据弯矩大小灵活配置构件，最大化钢材利用效率。',
+                'princ-load-title': '按荷载分布进行截面布置',
+                'princ-load-desc': '在连续梁中，支座处（端部）产生较大的负弯矩（-），中央部位产生正弯矩（+）。BESTOBEAM精确遵循这一力学机理。',
+                'princ-load-end': '<strong>端部（End Section）：</strong>采用有利于抵抗负弯矩的H型钢翼缘结构。',
+                'princ-load-center': '<strong>中央部（Center Section）：</strong>采用优化混凝土填充和下部拉力抵抗的U型截面。',
+                'princ-proc-title': '结构设计流程',
+                'princ-proc-1': '1. 对目标结构进行荷载分析和结构计算',
+                'princ-proc-2': '2. 计算各位置最大弯矩和剪力',
+                'princ-proc-3': '3. 应用BESTOBEAM最优截面（H-U转换点）计算逻辑',
+                'princ-proc-4': '4. 生成结构审查报告和详细设计图纸',
+
+                'test-title': '实证验证：<br>RIST/KOLAS 认证试验结果。',
+                'test-subhead': '通过权威机构的严格测试，验证了结构性能和安全性。',
+                'test-bend-title': '抗弯性能试验（Bending Performance）',
+                'test-bend-desc': '发挥设计强度120%以上的承载力，呈现稳定的荷载-位移曲线，确保了结构可靠性。',
+                'test-shear-title': '剪力连接件行为试验（Shear Connector Test）',
+                'test-shear-desc': '验证了端部H型钢与中央U型钢接合部产生的剪力流连续性，确认了整体性能。',
+                'test-seismic-title': '抗震性能（Seismic Performance）',
+                'test-seismic-item1': '<strong>梁-柱接合部抗震性能试验验证：</strong>通过循环加载试验，在类似实际地震的条件下确认了接合部的结构安全性。',
+                'test-seismic-item2': '<strong>优异的变形能力：</strong>确保了<strong>3%~4%高延性</strong>接合部转动能力，证明可有效吸收地震能量。',
+
+                'cert-title': '技术认证与专利。',
+                'cert-subhead': '通过国内外权威机构验证的技术实力，提供最高可靠性保障。',
+                'cert-intel-title': '国内外技术认证及知识产权',
+                'cert-intel-desc': '包括建设新技术指定在内，已完成国内外专利及结构工程师协会的严格技术审查。',
+                'cert-net': '<strong>建设新技术（NET）指定 [第835号]：</strong>国土交通部新技术指定（H型-U型组合式组合梁工法）',
+                'cert-patents': '<strong>知识产权保障：</strong>通过国内5项专利及美国专利注册实现独有技术保护',
+                'cert-ksea': '<strong>技术认证书获取：</strong>获得韩国建筑结构工程师协会的结构系统技术及安全认证',
+                'cert-icc-title': '美国 ICC-ES 认证获取',
+                'cert-icc-desc': '满足全球建筑设计及施工标准，确保了国际市场的技术可靠性。',
+                'cert-icc-no': '<strong>认证编号：</strong>ESR-4134（ICC-ES Evaluation Report）',
+                'cert-icc-verify': '<strong>验证内容：</strong>U型钢-混凝土组合梁系统的结构性能及美国建筑法规（IBC）适合性验证',
+                'cert-icc-sig': '<strong>意义：</strong>全球级结构性能及安全性的实证',
+
+                'proc-title': 'BESTOBEAM 施工创新：<br>高效连接与免模板标准工艺。',
+                'proc-subhead': '将传统工法熟悉的连接方式与免模板技术相结合，同时实现工期缩短和现场安全。',
+                'proc-girder-title': 'Girder 连接特征',
+                'proc-girder-item1': '<strong>连接方法与传统施工方法相同：</strong>采用现场工人熟悉的方式，可缩短工期',
+                'proc-girder-item2': '<strong>工厂预制（角钢）：</strong>剪力连接件角钢在工厂预先焊接制造，使现场施工更加便捷',
+                'proc-beam-title': 'Beam 连接特征',
+                'proc-beam-item1': '<strong>U型支架应用：</strong>在主梁上安装U型支架，提高次梁安装的施工便捷性和作业安全性',
+                'proc-step-title': '标准施工顺序',
+                'proc-step-1': '<strong>（1）底板及钢柱安装：</strong>固定基础底板并安装柱底部',
+                'proc-step-2': '<strong>（2）钢柱竖立：</strong>吊装并垂直组装上部钢柱',
+                'proc-step-3': '<strong>（3）Besto 组合梁安装：</strong>在柱间安放并连接BESTO组合梁',
+                'proc-step-4': '<strong>（4）楼承板及柱模板安装：</strong>布置楼板用楼承板及柱浇筑用模板',
+                'proc-step-5': '<strong>（5）楼板及下部柱混凝土浇筑：</strong>梁/楼板内部及下部柱同时浇筑',
+                'proc-step-6': '<strong>（6）上部柱及上部楼板混凝土浇筑：</strong>为实现结构整体化进行上层浇筑及收尾',
+                'proc-video-title': '现场安装视频 — 济州机场扩建工程',
+                'proc-video-desc': '实际现场中BESTOBEAM的吊装与就位过程。采用与传统H型钢相同的连接方式，无需额外的熟练过程。',
+                'proc-video-caption': '济州机场扩建工程现场 — BESTOBEAM 安装 (1分40秒)',
+                'footer-contact-label': '技术咨询',
+
+                'econ-title': 'VE（价值工程）案例：<br>数据验证的优化解决方案。',
+                'econ-subhead': '通过两个代表性案例（住宿设施、物流仓库），验证BESTOBEAM的实际经济效益。',
+                'econ-case1-title': 'CASE 01. 住宿设施 VE 应用案例（2F~11F）',
+                'econ-case1-badge': '地上层适用性评估完成',
+                'econ-case1-cond': '设计条件及荷载计划：',
+                'econ-case1-dl': '恒载（DL）：4.9 kN/m²（以楼板厚度150mm为基准）',
+                'econ-case1-ll': '活载（LL）：3.5 kN/m²（以办公及住宿设施标准为基准）',
+                'econ-case1-th-cat': '类别',
+                'econ-case1-th-orig': '原方案（H型钢）',
+                'econ-case1-th-alt': '替代方案（BESTOBEAM）',
+                'econ-case1-th-rate': '节约率',
+                'econ-case1-td-qty': '钢材用量（每层）',
+                'econ-case1-td-cost': '工程费用（每层）',
+                'econ-case1-orig-cost': '98,425,690 韩元',
+                'econ-case1-alt-cost': '89,049,723 韩元',
+                'econ-case1-tip-title': '※ 工程分析要点',
+                'econ-case1-tip-1': '• 经济性审查范围包括接合部、支架和千斤顶支撑。',
+                'econ-case1-tip-2': '• 即使原方案H型钢已是最小化设计，仍实现了<strong>约28%的额外用量节约</strong>。',
+                'econ-case1-tip-3': '• 以梁中央为基准确保了<strong>50mm的富余高度</strong>，提高了空间效率。',
+                'econ-case2-title': 'CASE 02. 大型物流仓库 VE 应用案例',
+                'econ-case2-badge': '超高荷载/大跨度优化',
+                'econ-case2-cond': '超高荷载设计条件：',
+                'econ-case2-dl': '恒载（DL）：6.62 kN/m²（楼板180mm + 素混凝土100mm）',
+                'econ-case2-ll': '活载（LL）：15.0 kN/m²（15m区段适用24.0 kN/m²）',
+                'econ-case2-span': '跨度规模：11.5m ~ 15.0m 大跨度结构',
+                'econ-case1-th-cat2': '类别',
+                'econ-case1-th-orig2': '原方案（H型钢）',
+                'econ-case1-th-alt2': '替代方案（BESTOBEAM）',
+                'econ-case1-th-rate2': '节约率',
+                'econ-case2-td-qty': '审查范围用量',
+                'econ-case2-td-cost': '审查范围工程费',
+                'econ-case2-orig-cost': '402,871,419 韩元',
+                'econ-case2-alt-cost': '338,684,232 韩元',
+                'econ-case2-tip-title': '※ 物流仓库专项分析',
+                'econ-case2-tip-1': '• 梁高缩减：中央部基准缩减梁高100~250mm，实现了突破性的层高节约。',
+                'econ-case2-tip-2': '• 施工性提升：无需千斤顶支撑的设计，缩短了工期并降低了施工费用。',
+                'econ-case2-tip-3': '• 构件优化：删除多余梁构件（SB0等）并替换为混合截面，<strong>实现用量节约29%</strong>。',
+
+                'height-title': '建筑价值：<br>层高缩减与空间创造。',
+                'height-subhead': '通过更纤薄的梁高（Beam Depth），最大化建筑整体空间效率。',
+                'height-box-title': '每层层高缩减200~400mm',
+                'height-box-desc': '效果：在同等建筑高度下提供更高的净层高，或增加总层数以提高销售收益。',
+
+                'vib-title': '为静谧环境而生的<br>振动控制技术。',
+                'vib-subhead': '通过混凝土填充效果增强刚度，提供舒适的居住环境。',
+                'vib-box-title': '振动特性分析与性能评估',
+                'vib-item1-title': '● 冲击锤激振的振动特性分析',
+                'vib-item1-desc': '- 基于实测数据确定楼板的固有频率和阻尼比',
+                'vib-item2-title': '● 行走激振响应测量与评估',
+                'vib-item2-desc': '- 基于激振测得的最大加速度，通过AISC Design Guide 11进行性能评估',
+                'vib-result': '<span style="font-size: 20px; margin-right: 8px;">➢</span> 评估结果：快步行走和普通行走均满足办公允许标准',
+
+                'ref-title': '国内外主要项目<br>应用业绩。',
+                'ref-subhead': '自2013年至今已应用于多种建筑物，持续验证技术实力。',
+                'ref-summary-title': '全部业绩汇总（Summary）',
+                'ref-th-date': '竣工年月',
+                'ref-th-name': '项目名称',
+                'ref-th-usage': '用途',
+                'ref-th-scale': '规模',
+                'ref-th-qty': '用量',
+                'ref-th-const': '施工单位',
+
+                'ref-card1-title': '平泽三星电子办公2栋',
+                'ref-card1-l1': '建筑用途', 'ref-card1-v1': '办公设施',
+                'ref-card1-l2': '规模', 'ref-card1-v2': '地下1层/地上12层',
+                'ref-card1-l3': '应用用量', 'ref-card1-v3': '5,230吨（全层）',
+                'ref-card1-l4': '施工单位', 'ref-card1-v4': 'KCC建设',
+                'ref-card1-l5': '供货期', 'ref-card1-v5': '2019.04（6个月）',
+
+                'ref-card2-title': '飞上教育总部大楼',
+                'ref-card2-l1': '建筑用途', 'ref-card2-v1': '办公设施',
+                'ref-card2-l2': '规模', 'ref-card2-v2': '12层',
+                'ref-card2-l3': '应用用量', 'ref-card2-v3': '2,132吨',
+                'ref-card2-l4': '施工单位', 'ref-card2-v4': '韩拉',
+                'ref-card2-l5': '供货期', 'ref-card2-v5': '2023.07（12个月）',
+
+                'ref-card3-title': '安城芳草2地区物流仓库',
+                'ref-card3-l1': '建筑用途', 'ref-card3-v1': '物流仓库',
+                'ref-card3-l2': '规模', 'ref-card3-v2': '4层',
+                'ref-card3-l3': '应用用量', 'ref-card3-v3': '1,920吨（地面坡道）',
+                'ref-card3-l4': '施工单位', 'ref-card3-v4': 'KCC建设',
+                'ref-card3-l5': '供货期', 'ref-card3-v5': '2024.02（6个月）',
+
+                'ref-card4-title': '乌山Cloud M仓库楼',
+                'ref-card4-l1': '建筑用途', 'ref-card4-v1': '物流仓库',
+                'ref-card4-l2': '规模', 'ref-card4-v2': '10层',
+                'ref-card4-l3': '应用用量', 'ref-card4-v3': '1,385吨',
+                'ref-card4-l4': '施工单位', 'ref-card4-v4': '新韩SNG',
+                'ref-card4-l5': '供货期', 'ref-card4-v5': '2021.03（6个月）',
+
+                'ref-card5-title': 'Caesars Korea综合度假村',
+                'ref-card5-l1': '建筑用途', 'ref-card5-v1': '综合设施',
+                'ref-card5-l2': '规模', 'ref-card5-v2': '地下2层/地上27层',
+                'ref-card5-l3': '应用用量', 'ref-card5-v3': '1,295吨（地上2~6层）',
+                'ref-card5-l4': '施工单位', 'ref-card5-v4': '双龙建设',
+                'ref-card5-l5': '供货期', 'ref-card5-v5': '2019.07（4个月）',
+
+                'ref-card6-title': '恩平乐天购物中心',
+                'ref-card6-l1': '建筑用途', 'ref-card6-v1': '零售设施',
+                'ref-card6-l2': '规模', 'ref-card6-v2': '地下2层/地上9层',
+                'ref-card6-l3': '应用用量', 'ref-card6-v3': '1,146吨',
+                'ref-card6-l4': '施工单位', 'ref-card6-v4': '乐天建设',
+                'ref-card6-l5': '供货期', 'ref-card6-v5': '2015.11（4个月）',
+
+                'ref-card7-title': '东滩湖公园停车塔',
+                'ref-card7-l1': '建筑用途', 'ref-card7-v1': '停车场',
+                'ref-card7-l2': '规模', 'ref-card7-v2': '地下2层/地上4层',
+                'ref-card7-l3': '应用用量', 'ref-card7-v3': '205吨',
+                'ref-card7-l4': '施工单位', 'ref-card7-v4': '新东亚建设',
+                'ref-card7-l5': '供货期', 'ref-card7-v5': '2024.08',
+
+                'ref-card8-title': '长期5自走式停车场',
+                'ref-card8-l1': '建筑用途', 'ref-card8-v1': '停车场',
+                'ref-card8-l2': '规模', 'ref-card8-v2': '3层',
+                'ref-card8-l3': '应用用量', 'ref-card8-v3': '100吨',
+                'ref-card8-l4': '施工单位', 'ref-card8-v4': 'Nael建设产业',
+                'ref-card8-l5': '供货期', 'ref-card8-v5': '2021.01',
+
+                'ref-tr1-c2': '东滩湖公园停车塔', 'ref-tr1-c3': '停车场', 'ref-tr1-c5': '205吨', 'ref-tr1-c6': '新东亚建设',
+                'ref-tr2-c2': '龙仁公世 Lafiano 新建工程', 'ref-tr2-c3': '公寓住宅', 'ref-tr2-c5': '7.6吨', 'ref-tr2-c6': 'RBDK Cons.',
+                'ref-tr3-c2': '安城芳草2地区物流仓库', 'ref-tr3-c3': '物流仓库', 'ref-tr3-c5': '1,920吨', 'ref-tr3-c6': 'KCC建设',
+                'ref-tr4-c2': 'DRB 越南2工厂 混炼楼', 'ref-tr4-c3': '工厂设施', 'ref-tr4-c5': '78吨', 'ref-tr4-c6': 'MEGA D&C',
+                'ref-tr5-c2': '飞上教育总部大楼', 'ref-tr5-c3': '办公设施', 'ref-tr5-c5': '2,132吨', 'ref-tr5-c6': '韩拉',
+                'ref-tr6-c2': 'GS THE FRESH 原州店停车塔', 'ref-tr6-c3': '停车场', 'ref-tr6-c5': '217吨', 'ref-tr6-c6': '新韩SNG',
+                'ref-tr7-c2': '利川安兴洞住商综合体', 'ref-tr7-c3': '住商综合', 'ref-tr7-c5': '52吨', 'ref-tr7-c6': 'JH Eng.',
+                'ref-tr8-c2': '乌山Cloud M仓库楼', 'ref-tr8-c3': '物流仓库', 'ref-tr8-c5': '1,385吨', 'ref-tr8-c6': '新韩SNG',
+                'ref-tr9-c2': '长期5自走式停车场', 'ref-tr9-c3': '停车场', 'ref-tr9-c5': '100吨', 'ref-tr9-c6': 'Nael建设产业',
+                'ref-tr10-c2': '平泽三星电子办公2栋', 'ref-tr10-c3': '办公设施', 'ref-tr10-c5': '5,230吨', 'ref-tr10-c6': 'KCC建设',
+                'ref-tr11-c2': '济州机场扩建工程', 'ref-tr11-c3': '公共设施', 'ref-tr11-c5': '581吨', 'ref-tr11-c6': '锦湖建设',
+                'ref-tr12-c2': '汝矣岛K大厦', 'ref-tr12-c3': '办公设施', 'ref-tr12-c5': '935吨', 'ref-tr12-c6': 'KCC建设',
+                'ref-tr13-c2': '恩平乐天购物中心', 'ref-tr13-c3': '零售设施', 'ref-tr13-c5': '1,146吨', 'ref-tr13-c6': '乐天建设',
+                'ref-tr14-c2': '东子洞双龙白金公寓', 'ref-tr14-c3': '住商综合', 'ref-tr14-c5': '17吨', 'ref-tr14-c6': '双龙建设',
+                'ref-tr15-c1': '2026.08', 'ref-tr15-c2': '松楸 Gamagol 钢结构停车场', 'ref-tr15-c3': '停车场', 'ref-tr15-c5': '65吨', 'ref-tr15-c6': 'Dajim产业开发',
+                'ref-tr16-c1': '2027.01', 'ref-tr16-c2': 'Fursys 越南2工厂新建工程', 'ref-tr16-c3': '工厂设施', 'ref-tr16-c5': '2,427吨', 'ref-tr16-c6': 'MEGA D&C',
+                'ref-tr17-c1': '2026.11', 'ref-tr17-c2': '大邱泛鱼 Jarione 住商综合体新建工程', 'ref-tr17-c3': '住商综合', 'ref-tr17-c5': '20.7吨', 'ref-tr17-c6': 'Xi S&D',
+                'ref-tr18-c1': '2026.05', 'ref-tr18-c2': '水原堂水住商综合体新建工程', 'ref-tr18-c3': '住商综合', 'ref-tr18-c5': '3.02吨', 'ref-tr18-c6': '韩拉',
+                'ref-tr19-c1': '2026.05', 'ref-tr19-c2': '圣水洞 STIC 办公楼新建工程', 'ref-tr19-c3': '办公设施', 'ref-tr19-c5': '247吨', 'ref-tr19-c6': 'KCC建设',
+                'ref-tr20-c1': '2026.12', 'ref-tr20-c2': 'JB金融集团总部大楼新建工程', 'ref-tr20-c3': '办公设施', 'ref-tr20-c5': '967吨', 'ref-tr20-c6': 'DL建设',
+
+                'footer-conf': '<strong>机密及专有资料</strong> - BESTOBEAM 技术演示资料',
+                'footer-copy': '本资料为技术提案专用，严禁擅自转载及分发。'
+            },
+            'vi': {
+                'nav-overview': 'Tổng quan',
+                'nav-principle': 'Nguyên lý',
+                'nav-test': 'Thử nghiệm',
+                'nav-certification': 'Chứng nhận',
+                'nav-process': 'Thi công',
+                'nav-economy': 'Kinh tế',
+                'nav-height': 'Chiều cao tầng',
+                'nav-vibration': 'Chống rung',
+                'nav-reference': 'Dự án',
+                'btn-design-text': 'Thiết kế BESTOBEAM',
+                'btn-video-text': 'Video quảng bá',
+                'btn-drb-text': 'Giới thiệu DRB',
+                'btn-np-text': 'NP Column',
+                'btn-pc-text': 'Cột PC rỗng',
+                'overview-title': 'BESTOBEAM: <br>Sự kết hợp giữa ưu điểm của dầm composite và sự tiện lợi trong thi công.',
+                'overview-subhead': '『BEst Solution TO customer』 BEAM. Đổi mới khả năng thi công với thiết kế hybrid giữa phần H và phần U.',
+                'beam-def-title': '💡 Dầm (Beam) là gì?',
+                'beam-def-desc': 'Là <strong>thành phần chính nằm ngang (nằm ngang) trong khung xương của tòa nhà, hỗ trợ trực tiếp cho sàn nhà</strong>. Ví von như cơ thể con người, nó đóng vai trò giống như \'xương sườn\' kết nối với cột sống để nâng đỡ thân mình. Nó chịu toàn bộ trọng lượng tác động lên sàn (người, nội thất, v.v.) và truyền tải lại cho các cột dọc để giữ cho tòa nhà không bị đổ sụp.',
+                'ov-econ-title': '1. Tính kinh tế',
+                'ov-econ-desc': 'Giảm <strong>30~40% lượng thép</strong> so với dầm thép thông thường. Hiệu quả kinh tế được tối đa hóa trong các tòa nhà nhịp lớn và tải trọng cao.',
+                'ov-const-title': '2. Khả năng thi công',
+                'ov-const-desc': '<strong>Tương tự như phương pháp thi công thép hình H</strong> truyền thống, đảm bảo kỹ năng hiện trường cao, rút ngắn tiến độ và dễ dàng đảm bảo chất lượng.',
+                'ov-flex-title': '3. Tính linh hoạt',
+                'ov-flex-desc': 'Dễ dàng áp dụng cho <strong>phương pháp Top-Down</strong>, và có thể lắp đặt bất kể loại cột nào (thép, SRC, CFT, v.v.).',
+                'ov-sust-title': '4. Tính bền vững',
+                'ov-sust-desc': 'Thực hiện kiến trúc thân thiện với môi trường thông qua <strong>hiệu quả giảm chiều cao tầng</strong> và giảm lượng khí thải carbon (CO2) nhờ tiết kiệm nguyên vật liệu.',
+                
+                'comp-title': 'Cấu tạo và Thông số kỹ thuật của BESTOBEAM (Loại thép sử dụng: SM355 hoặc tương đương)',
+                'comp-desc': 'BESTOBEAM duy trì tính toàn vẹn cấu trúc thông qua sự kết hợp của các thành phần phụ trợ được gia công chính xác.',
+                'comp-h-label': 'Phần H (End Section):',
+                'comp-u-label': 'Phần U (Center Section):',
+                'comp-overlap-label': 'Vùng chồng lấp (Overlap):',
+                'comp-angle-label': 'Thép góc (L-50X6):',
+                'comp-stud-label': 'Đinh neo (Stud Bolt):',
+                'comp-stiffener-label': 'Tấm gia cường (Stiffener):',
+                'comp-h': '<strong id="comp-h-label">Phần H (End Section):</strong> Chịu lực cắt và mô-men âm tại các nút liên kết cột.',
+                'comp-u': '<strong id="comp-u-label">Phần U (Center Section):</strong> Phần đổ bê tông và chịu mô-men dương.',
+                'comp-overlap': '<strong id="comp-overlap-label">Vùng chồng lấp (Overlap):</strong> Phần chuyển tiếp để truyền lực an toàn giữa hai tiết diện.',
+                'comp-angle': '<strong id="comp-angle-label">Thép góc (L-50X6):</strong> Kiểm soát chuyển vị ngang và đóng vai trò neo liên kết trên đỉnh phần U.',
+                'comp-stud': '<strong id="comp-stud-label">Đinh neo (Stud Bolt):</strong> Đảm bảo sự làm việc đồng khối giữa các tấm gia cường và phần H.',
+                'comp-stiffener': '<strong id="comp-stiffener-label">Tấm gia cường (Stiffener):</strong> Ngăn ngừa mất ổn định cục bộ và tăng cường độ cứng tại các vùng tập trung ứng suất.',
+
+                'princ-title': 'Logic tối ưu hóa thiết kế tiết diện.',
+                'princ-subhead': 'Tối đa hóa hiệu quả sử dụng thép bằng cách bố trí linh hoạt các thành phần theo độ lớn của mô-men.',
+                'princ-load-title': 'Bố trí tiết diện theo phân bố tải trọng',
+                'princ-load-desc': 'Trong dầm liên tục, các điểm gối (đầu dầm) phát sinh mô-men âm (-) lớn, trong khi phần giữa dầm phát sinh mô-men dương (+). BESTOBEAM tuân thủ chính xác cơ chế này.',
+                'princ-load-end': '<strong>Phần đầu dầm (End Section):</strong> Áp dụng cấu trúc bản cánh thép hình H có lợi cho việc kháng mô-men âm.',
+                'princ-load-center': '<strong>Phần giữa dầm (Center Section):</strong> Áp dụng tiết diện hình U tối ưu cho việc đổ bê tông và kháng lực kéo phía dưới.',
+                'princ-proc-title': 'Quy trình thiết kế cấu trúc',
+                'princ-proc-1': '1. Phân tích tải trọng và thực hiện tính toán cấu trúc cho công trình mục tiêu',
+                'princ-proc-2': '2. Tính toán mô-men và lực cắt tối đa tại từng vị trí',
+                'princ-proc-3': '3. Áp dụng logic tính toán tiết diện tối ưu BESTOBEAM (điểm chuyển đổi H-U)',
+                'princ-proc-4': '4. Lập báo cáo kiểm tra cấu trúc và bản vẽ thiết kế chi tiết',
+
+                'test-title': 'Kiểm chứng thực tế: <br>Kết quả thử nghiệm đạt chứng nhận RIST/KOLAS.',
+                'test-subhead': 'Hiệu suất cấu trúc và tính an toàn đã được chứng minh thông qua các bài kiểm tra nghiêm ngặt của các cơ quan có thẩm quyền.',
+                'test-bend-title': 'Thử nghiệm hiệu suất uốn (Bending Performance)',
+                'test-bend-desc': 'Thể hiện khả năng chịu lực trên 120% so với cường độ thiết kế, đồng thời cho thấy đường cong tải trọng-biến dạng ổn định, đảm bảo độ tin cậy về cấu trúc.',
+                'test-shear-title': 'Thử nghiệm hành vi của liên kết chịu cắt (Shear Connector Test)',
+                'test-shear-desc': 'Xác nhận sự làm việc đồng khối bằng cách kiểm chứng tính liên tục của dòng lực cắt phát sinh tại vị trí tiếp giáp giữa thép hình H ở đầu dầm và thép hình U ở giữa dầm.',
+                'test-seismic-title': 'Hiệu suất kháng chấn (Seismic Performance)',
+                'test-seismic-item1': '<strong>Kiểm chứng thử nghiệm hiệu suất kháng chấn nút liên kết dầm-cột :</strong> Xác nhận tính an toàn cấu trúc của nút liên kết trong các điều kiện tương tự như động đất thực tế thông qua các thử nghiệm tải trọng lặp.',
+                'test-seismic-item2': '<strong>Khả năng biến dạng ưu việt :</strong> Chứng minh khả năng hấp thụ năng lượng động đất hiệu quả bằng cách đảm bảo khả năng xoay của nút liên kết with <strong>độ dẻo cao từ 3%~4%</strong>.',
+
+                'cert-title': 'Chứng nhận kỹ thuật và Bằng sáng chế.',
+                'cert-subhead': 'Cung cấp sự tin cậy tối ưu thông qua năng lực công nghệ đã được kiểm chứng bởi các cơ quan có thẩm quyền trong và ngoài nước.',
+                'cert-intel-title': 'Chứng nhận kỹ thuật và Quyền sở hữu trí tuệ',
+                'cert-intel-desc': 'Đã hoàn thành các quy trình kiểm chứng kỹ thuật nghiêm ngặt của Hiệp hội Kỹ sư Cấu trúc và các bằng sáng chế trong/ngoài nước, bao gồm cả việc chỉ định Công nghệ mới trong xây dựng.',
+                'cert-net': '<strong>Chỉ định Công nghệ mới Xây dựng (NET) [Số 835]:</strong> Được chỉ định bởi Bộ Đất đai, Hạ tầng và Giao thông (Phương pháp dầm composite kết hợp hình H và hình U)',
+                'cert-patents': '<strong>Đảm bảo Quyền sở hữu trí tuệ:</strong> Bảo hộ công nghệ độc quyền thông qua 5 bằng sáng chế trong nước và đăng ký bằng sáng chế tại Mỹ',
+                'cert-ksea': '<strong>Đạt Chứng nhận Kỹ thuật:</strong> Chứng nhận năng lực kỹ thuật và tính an toàn của hệ thống cấu trúc từ Hiệp hội Kỹ sư Cấu trúc Công trình Hàn Quốc (KSEA)',
+                'cert-icc-title': 'Đạt chứng nhận ICC-ES của Mỹ',
+                'cert-icc-desc': 'Đảm bảo sự tin cậy kỹ thuật trên thị trường quốc tế bằng cách đáp ứng các tiêu chuẩn thiết kế và thi công công trình toàn cầu.',
+                'cert-icc-no': '<strong>Số chứng nhận:</strong> ESR-4134 (ICC-ES Evaluation Report)',
+                'cert-icc-verify': '<strong>Nội dung kiểm chứng:</strong> Kiểm chứng hiệu suất cấu trúc của hệ thống U-Shaped Steel-Concrete Composite Beam và sự phù hợp với Bộ luật Xây dựng Quốc tế (IBC) của Mỹ',
+                'cert-icc-sig': '<strong>Ý nghĩa:</strong> Chứng minh hiệu suất cấu trúc và tính an toàn ở cấp độ toàn cầu',
+
+                'proc-title': 'Đổi mới thi công BESTOBEAM: <br>Liên kết hiệu quả và quy trình tiêu chuẩn không cần cốp pha.',
+                'proc-subhead': 'Kết hợp phương pháp liên kết quen thuộc của các phương pháp truyền thống với công nghệ không cốp pha để đồng thời rút ngắn tiến độ và đảm bảo an toàn tại hiện trường.',
+                'proc-girder-title': 'Đặc điểm liên kết Dầm chính (Girder)',
+                'proc-girder-item1': '<strong>Phương pháp liên kết tương tự như phương pháp thi công truyền thống :</strong> Có thể rút ngắn tiến độ bằng phương pháp quen thuộc với công nhân hiện trường',
+                'proc-girder-item2': '<strong>Sản xuất tại nhà máy (Thép góc) :</strong> Việc sản xuất hàn trước thép góc (shear connector) tại nhà máy giúp thi công tại hiện trường thuận tiện hơn so với trước đây',
+                'proc-beam-title': 'Đặc điểm liên kết Dầm phụ (Beam)',
+                'proc-beam-item1': '<strong>Sử dụng giá đỡ hình chữ U (U-bracket) :</strong> Lắp đặt giá đỡ hình chữ U trên dầm chính để tăng tính tiện lợi khi lắp đặt dầm phụ và cải thiện an toàn lao động',
+                'proc-step-title': 'Trình tự thi công tiêu chuẩn',
+                'proc-step-1': '<strong>(1) Lắp đặt bản đế (Base Plate) và cột thép:</strong> Cố định bản đế móng và lắp đặt phần dưới của cột',
+                'proc-step-2': '<strong>(2) Dựng cột thép:</strong> Cẩu và lắp ráp thẳng đứng phần cột thép phía trên',
+                'proc-step-3': '<strong>(3) Lắp đặt dầm Besto Composite Beam:</strong> Đặt và liên kết dầm composite Besto giữa các cột',
+                'proc-step-4': '<strong>(4) Lắp đặt tấm sàn (Deck Plate) và cốp pha cột:</strong> Bố trí tấm sàn và cốp pha để đổ bê tông cột',
+                'proc-step-5': '<strong>(5) Đổ bê tông sàn và cột dưới:</strong> Đổ bê tông đồng thời cho bên trong dầm/sàn và cột phía dưới',
+                'proc-step-6': '<strong>(6) Đổ bê tông cột trên và sàn trên:</strong> Đổ bê tông tầng trên và hoàn thiện để tạo tính đồng khối cho cấu trúc',
+                'proc-video-title': 'Video lắp đặt hiện trường — Mở rộng sân bay Jeju',
+                'proc-video-desc': 'Quá trình cẩu và lắp đặt BESTOBEAM tại công trường thực tế. Phương pháp liên kết giống dầm H thông thường, không cần đào tạo thêm.',
+                'proc-video-caption': 'Công trường mở rộng sân bay Jeju — Lắp đặt BESTOBEAM (1 phút 40 giây)',
+                'footer-contact-label': 'LIÊN HỆ',
+
+                'econ-title': 'Trường hợp VE (Value Engineering): <br>Giải pháp tối ưu hóa được chứng minh bằng dữ liệu.',
+                'econ-subhead': 'Hãy kiểm chứng tính kinh tế thực tế của BESTOBEAM thông qua hai trường hợp điển hình (Cơ sở lưu trú, Kho bãi).',
+                'econ-case1-title': 'CASE 01. Trường hợp áp dụng VE cho cơ sở lưu trú (Tầng 2~11)',
+                'econ-case1-badge': 'Đã hoàn thành đánh giá khả năng áp dụng cho tầng trên mặt đất',
+                'econ-case1-cond': 'Điều kiện thiết kế và kế hoạch tải trọng:',
+                'econ-case1-dl': 'Tải trọng tĩnh (DL): 4.9 kN/m² (Dựa trên độ dày sàn 150mm)',
+                'econ-case1-ll': 'Tải trọng động (LL): 3.5 kN/m² (Dựa trên tiêu chuẩn văn phòng và cơ sở lưu trú)',
+                'econ-case1-th-cat': 'Phân loại',
+                'econ-case1-th-orig': 'Phương án gốc (Thép hình H)',
+                'econ-case1-th-alt': 'Phương án thay thế (BESTOBEAM)',
+                'econ-case1-th-rate': 'Tỷ lệ tiết kiệm',
+                'econ-case1-td-qty': 'Khối lượng thép (mỗi tầng)',
+                'econ-case1-td-cost': 'Chi phí thi công (mỗi tầng)',
+                'econ-case1-orig-cost': '98,425,690 KRW',
+                'econ-case1-alt-cost': '89,049,723 KRW',
+                'econ-case1-tip-title': '※ Điểm phân tích kỹ thuật',
+                'econ-case1-tip-1': '• Phạm vi xem xét tính kinh tế bao gồm nút liên kết, giá đỡ và kích hỗ trợ (jack support).',
+                'econ-case1-tip-2': '• Mặc dù thiết kế gốc của dầm thép hình H đã được tối ưu hóa tối thiểu, nhưng vẫn đạt được <strong>tiết kiệm thêm khoảng 28% khối lượng</strong>.',
+                'econ-case1-tip-3': '• Đảm bảo <strong>chiều cao dư 50mm</strong> so với giữa dầm để tăng hiệu quả không gian.',
+                'econ-case2-title': 'CASE 02. Trường hợp áp dụng VE cho kho bãi quy mô lớn',
+                'econ-case2-badge': 'Tối ưu hóa tải trọng siêu cao/nhịp dài',
+                'econ-case2-cond': 'Điều kiện thiết kế tải trọng siêu cao:',
+                'econ-case2-dl': 'Tải trọng tĩnh (DL): 6.62 kN/m² (Sàn 180mm + Bê tông không cốt thép 100mm)',
+                'econ-case2-ll': 'Tải trọng động (LL): 15.0 kN/m² (Áp dụng 24.0 kN/m² cho đoạn 15m)',
+                'econ-case2-span': 'Quy mô nhịp: cấu trúc nhịp dài 11.5m ~ 15.0m',
+                'econ-case1-th-cat2': 'Phân loại',
+                'econ-case1-th-orig2': 'Phương án gốc (Thép hình H)',
+                'econ-case1-th-alt2': 'Phương án thay thế (BESTOBEAM)',
+                'econ-case1-th-rate2': 'Tỷ lệ tiết kiệm',
+                'econ-case2-td-qty': 'Khối lượng trong phạm vi xem xét',
+                'econ-case2-td-cost': 'Chi phí thi công trong phạm vi xem xét',
+                'econ-case2-orig-cost': '402,871,419 KRW',
+                'econ-case2-alt-cost': '338,684,232 KRW',
+                'econ-case2-tip-title': '※ Phân tích đặc thù kho bãi',
+                'econ-case2-tip-1': '• Giảm chiều cao dầm: Đạt được sự giảm chiều cao tầng đột phá bằng cách giảm độ sâu dầm 100~250mm tại phần giữa.',
+                'econ-case2-tip-2': '• Nâng cao khả năng thi công: Giảm tiến độ và chi phí thi công với thiết kế không cần kích hỗ trợ (jack support).',
+                'econ-case2-tip-3': '• Tối ưu hóa cấu kiện: Xóa bỏ các cấu kiện dầm không cần thiết (SB0, v.v.) và thay thế bằng tiết diện hybrid, giúp giảm 29% khối lượng.',
+
+                'height-title': 'Giá trị kiến trúc: <br>Giảm chiều cao tầng và kiến tạo không gian.',
+                'height-subhead': 'Tối đa hóa hiệu quả không gian của toàn bộ tòa nhà thông qua việc giảm độ sâu dầm (Beam Depth).',
+                'height-box-title': 'Giảm 200~400mm chiều cao mỗi tầng',
+                'height-box-desc': 'Kết quả: Cung cấp trần nhà cao hơn ở cùng một chiều cao tòa nhà hoặc tăng tổng số tầng để nâng cao lợi nhuận kinh doanh.',
+
+                'vib-title': 'Công nghệ kiểm soát rung <br>cho môi trường yên tĩnh.',
+                'vib-subhead': 'Mang lại môi trường sống thoải mái bằng cách tăng độ cứng thông qua hiệu ứng đổ đầy bê tông.',
+                'vib-box-title': 'Phân tích đặc tính rung và Đánh giá hiệu suất',
+                'vib-item1-title': '● Phân tích đặc tính rung thông qua kích thích bằng búa xung lực (Impact Hammer)',
+                'vib-item1-desc': '- Xác định tần số dao động riêng và tỷ số cản của sàn dựa trên dữ liệu đo được',
+                'vib-item2-title': '● Đo lường và đánh giá phản ứng kích thích do đi bộ',
+                'vib-item2-desc': '- Đánh giá hiệu suất thông qua AISC Design Guide 11 dựa trên gia tốc tối đa đo được theo kích thích',
+                'vib-result': '<span style="font-size: 20px; margin-right: 8px;">➢</span> Kết quả đánh giá, cả đi bộ nhanh và đi bộ bình thường đều đáp ứng tiêu chuẩn cho phép đối với văn phòng',
+
+                'ref-title': 'Danh lục các dự án <br>tiêu biểu trong và ngoài nước.',
+                'ref-subhead': 'Đã được áp dụng cho nhiều công trình khác nhau từ năm 2013 đến nay, chứng minh năng lực kỹ thuật vượt trội.',
+                'ref-summary-title': 'Tóm tắt toàn bộ dự án (Summary)',
+                'ref-th-date': 'Tháng năm hoàn thành',
+                'ref-th-name': 'Tên dự án',
+                'ref-th-usage': 'Mục đích sử dụng',
+                'ref-th-scale': 'Quy mô',
+                'ref-th-qty': 'Khối lượng',
+                'ref-th-const': 'Đơn vị thi công',
+
+                'ref-card1-title': 'Tòa nhà văn phòng số 2 Samsung Electronics Pyeongtaek',
+                'ref-card1-l1': 'Mục đích sử dụng', 'ref-card1-v1': 'Văn phòng',
+                'ref-card1-l2': 'Quy mô', 'ref-card1-v2': '1 hầm/12 tầng',
+                'ref-card1-l3': 'Khối lượng áp dụng', 'ref-card1-v3': '5,230 tấn (Toàn bộ tầng)',
+                'ref-card1-l4': 'Đơn vị thi công', 'ref-card1-v4': 'KCC Construction',
+                'ref-card1-l5': 'Thời gian cung cấp', 'ref-card1-v5': '04/2019 (6 tháng)',
+
+                'ref-card2-title': 'Trụ sở Visang Education',
+                'ref-card2-l1': 'Mục đích sử dụng', 'ref-card2-v1': 'Văn phòng',
+                'ref-card2-l2': 'Quy mô', 'ref-card2-v2': '12 tầng',
+                'ref-card2-l3': 'Khối lượng áp dụng', 'ref-card2-v3': '2,132 tấn',
+                'ref-card2-l4': 'Đơn vị thi công', 'ref-card2-v4': 'Halla',
+                'ref-card2-l5': 'Thời gian cung cấp', 'ref-card2-v5': '07/2023 (12 tháng)',
+
+                'ref-card3-title': 'Kho bãi khu vực Anseong Bangcho 2',
+                'ref-card3-l1': 'Mục đích sử dụng', 'ref-card3-v1': 'Kho bãi',
+                'ref-card3-l2': 'Quy mô', 'ref-card3-v2': '4 tầng',
+                'ref-card3-l3': 'Khối lượng áp dụng', 'ref-card3-v3': '1,920 tấn (Đường dốc trên mặt đất)',
+                'ref-card3-l4': 'Đơn vị thi công', 'ref-card3-v4': 'KCC Construction',
+                'ref-card3-l5': 'Thời gian cung cấp', 'ref-card3-v5': '02/2024 (6 tháng)',
+
+                'ref-card4-title': 'Tòa nhà kho Osan Cloud M',
+                'ref-card4-l1': 'Mục đích sử dụng', 'ref-card4-v1': 'Kho bãi',
+                'ref-card4-l2': 'Quy mô', 'ref-card4-v2': '10 tầng',
+                'ref-card4-l3': 'Khối lượng áp dụng', 'ref-card4-v3': '1,385 tấn',
+                'ref-card4-l4': 'Đơn vị thi công', 'ref-card4-v4': 'Shinhan SNG',
+                'ref-card4-l5': 'Thời gian cung cấp', 'ref-card4-v5': '03/2021 (6 tháng)',
+
+                'ref-card5-title': 'Khu nghỉ dưỡng phức hợp Caesars Korea',
+                'ref-card5-l1': 'Mục đích sử dụng', 'ref-card5-v1': 'Cơ sở phức hợp',
+                'ref-card5-l2': 'Quy mô', 'ref-card5-v2': '2 hầm/27 tầng',
+                'ref-card5-l3': 'Khối lượng áp dụng', 'ref-card5-v3': '1,295 tấn (Tầng 2~6 trên mặt đất)',
+                'ref-card5-l4': 'Đơn vị thi công', 'ref-card5-v4': 'Ssangyong Construction',
+                'ref-card5-l5': 'Thời gian cung cấp', 'ref-card5-v5': '07/2019 (4 tháng)',
+
+                'ref-card6-title': 'Lotte Mall Eunpyeong',
+                'ref-card6-l1': 'Mục đích sử dụng', 'ref-card6-v1': 'Cơ sở bán hàng',
+                'ref-card6-l2': 'Quy mô', 'ref-card6-v2': '2 hầm/9 tầng',
+                'ref-card6-l3': 'Khối lượng áp dụng', 'ref-card6-v3': '1,146 tấn',
+                'ref-card6-l4': 'Đơn vị thi công', 'ref-card6-v4': 'Lotte Construction',
+                'ref-card6-l5': 'Thời gian cung cấp', 'ref-card6-v5': '11/2015 (4 tháng)',
+
+                'ref-card7-title': 'Tháp đỗ xe công viên hồ Dongtan',
+                'ref-card7-l1': 'Mục đích sử dụng', 'ref-card7-v1': 'Bãi đỗ xe',
+                'ref-card7-l2': 'Quy mô', 'ref-card7-v2': '2 hầm/4 tầng',
+                'ref-card7-l3': 'Khối lượng áp dụng', 'ref-card7-v3': '205 tấn',
+                'ref-card7-l4': 'Đơn vị thi công', 'ref-card7-v4': 'Shindongah Cons.',
+                'ref-card7-l5': 'Thời gian cung cấp', 'ref-card7-v5': '08/2024',
+
+                'ref-card8-title': 'Bãi đỗ xe tự lái Janggi 5',
+                'ref-card8-l1': 'Mục đích sử dụng', 'ref-card8-v1': 'Bãi đỗ xe',
+                'ref-card8-l2': 'Quy mô', 'ref-card8-v2': '3 tầng',
+                'ref-card8-l3': 'Khối lượng áp dụng', 'ref-card8-v3': '100 tấn',
+                'ref-card8-l4': 'Đơn vị thi công', 'ref-card8-v4': 'Nael Cons.',
+                'ref-card8-l5': 'Thời gian cung cấp', 'ref-card8-v5': '01/2021',
+
+                'ref-tr1-c2': 'Tháp đỗ xe công viên hồ Dongtan', 'ref-tr1-c3': 'Bãi đỗ xe', 'ref-tr1-c5': '205 tấn', 'ref-tr1-c6': 'Shindongah Cons.',
+                'ref-tr2-c2': 'Công trình xây mới Yongin Gongse Lafiano', 'ref-tr2-c3': 'Chung cư', 'ref-tr2-c5': '7.6 tấn', 'ref-tr2-c6': 'RBDK Cons.',
+                'ref-tr3-c2': 'Kho bãi khu vực Anseong Bangcho 2', 'ref-tr3-c3': 'Kho bãi', 'ref-tr3-c5': '1,920 tấn', 'ref-tr3-c6': 'KCC Cons.',
+                'ref-tr4-c2': 'Nhà máy DRB Việt Nam số 2 - Khu luyện cao su', 'ref-tr4-c3': 'Cơ sở nhà máy', 'ref-tr4-c5': '78 tấn', 'ref-tr4-c6': 'MEGA D&C',
+                'ref-tr5-c2': 'Trụ sở Visang Education', 'ref-tr5-c3': 'Văn phòng', 'ref-tr5-c5': '2,132 tấn', 'ref-tr5-c6': 'Halla',
+                'ref-tr6-c2': 'Tháp đỗ xe GS THE FRESH chi nhánh Wonju', 'ref-tr6-c3': 'Bãi đỗ xe', 'ref-tr6-c5': '217 tấn', 'ref-tr6-c6': 'Shinhan SNG',
+                'ref-tr7-c2': 'Khu phức hợp Icheon Anheung-dong', 'ref-tr7-c3': 'Khu phức hợp', 'ref-tr7-c5': '52 tấn', 'ref-tr7-c6': 'JH Eng.',
+                'ref-tr8-c2': 'Tòa nhà kho Osan Cloud M', 'ref-tr8-c3': 'Kho bãi', 'ref-tr8-c5': '1,385 tấn', 'ref-tr8-c6': 'Shinhan SNG',
+                'ref-tr9-c2': 'Bãi đỗ xe tự lái Janggi 5', 'ref-tr9-c3': 'Bãi đỗ xe', 'ref-tr9-c5': '100 tấn', 'ref-tr9-c6': 'Nael Cons.',
+                'ref-tr10-c2': 'Tòa nhà văn phòng số 2 Samsung Electronics Pyeongtaek', 'ref-tr10-c3': 'Văn phòng', 'ref-tr10-c5': '5,230 tấn', 'ref-tr10-c6': 'KCC Cons.',
+                'ref-tr11-c2': 'Công trình mở rộng sân bay Jeju', 'ref-tr11-c3': 'Cơ sở công cộng', 'ref-tr11-c5': '581 tấn', 'ref-tr11-c6': 'Kumho Cons.',
+                'ref-tr12-c2': 'Yeouido K Tower', 'ref-tr12-c3': 'Văn phòng', 'ref-tr12-c5': '935 tấn', 'ref-tr12-c6': 'KCC Cons.',
+                'ref-tr13-c2': 'Lotte Mall Eunpyeong', 'ref-tr13-c3': 'Cơ sở bán hàng', 'ref-tr13-c5': '1,146 tấn', 'ref-tr13-c6': 'Lotte Cons.',
+                'ref-tr14-c2': 'Dongjadong Ssangyong Platinum', 'ref-tr14-c3': 'Khu phức hợp', 'ref-tr14-c5': '17 tấn', 'ref-tr14-c6': 'Ssangyong Cons.',
+                'ref-tr15-c1': '2026.08', 'ref-tr15-c2': 'Bãi đỗ xe kết cấu thép Songchu Gamagol', 'ref-tr15-c3': 'Bãi đỗ xe', 'ref-tr15-c5': '65 tấn', 'ref-tr15-c6': 'Dajim Industrial Dev.',
+                'ref-tr16-c1': '2027.01', 'ref-tr16-c2': 'Công trình xây mới Nhà máy Fursys Việt Nam số 2', 'ref-tr16-c3': 'Cơ sở nhà máy', 'ref-tr16-c5': '2,427 tấn', 'ref-tr16-c6': 'MEGA D&C',
+                'ref-tr17-c1': '2026.11', 'ref-tr17-c2': 'Công trình xây mới khu phức hợp Daegu Beomeo Jarione', 'ref-tr17-c3': 'Khu phức hợp', 'ref-tr17-c5': '20.7 tấn', 'ref-tr17-c6': 'Xi S&D',
+                'ref-tr18-c1': '2026.05', 'ref-tr18-c2': 'Công trình xây mới khu phức hợp Suwon Dangsu', 'ref-tr18-c3': 'Khu phức hợp', 'ref-tr18-c5': '3.02 tấn', 'ref-tr18-c6': 'Halla',
+                'ref-tr19-c1': '2026.05', 'ref-tr19-c2': 'Công trình xây mới tòa văn phòng STIC Seongsu-dong', 'ref-tr19-c3': 'Văn phòng', 'ref-tr19-c5': '247 tấn', 'ref-tr19-c6': 'KCC Cons.',
+                'ref-tr20-c1': '2026.12', 'ref-tr20-c2': 'Công trình xây mới trụ sở Tập đoàn Tài chính JB', 'ref-tr20-c3': 'Văn phòng', 'ref-tr20-c5': '967 tấn', 'ref-tr20-c6': 'DL Cons.',
+
+                'footer-conf': '<strong>BẢO MẬT & ĐỘC QUYỀN</strong> - Tài liệu trình bày kỹ thuật BESTOBEAM',
+                'footer-copy': 'Tài liệu này được soạn thảo cho mục đích đề xuất kỹ thuật, nghiêm cấm mọi hình thức sao chép và phân phối trái phép.'
+            }
+        };
+
+        const TAB_IDS = ['overview', 'principle', 'test', 'certification', 'process',
+            'economy', 'height', 'vibration', 'reference'];
+        const LANG_KEY = 'bestobeam.lang';
+        const DRB_VIDEO_ID = 'm-Iyd3YwtmA';
+
+        function showTab(event, tabId, updateHash) {
+            const pages = document.querySelectorAll('.page-content');
+            pages.forEach(page => page.classList.remove('active'));
+
+            const tabs = document.querySelectorAll('.tab-link');
+            tabs.forEach(tab => tab.classList.remove('active'));
+
+            const targetPage = document.getElementById(tabId);
+            if (targetPage) targetPage.classList.add('active');
+            
+            if (event) {
+                event.currentTarget.classList.add('active');
+            } else {
+                const targetTab = document.querySelector(`.tab-link[onclick*="${tabId}"]`);
+                if (targetTab) targetTab.classList.add('active');
+            }
+
+            closeMobileMenu();
+            updateMobileMenuLabel();
+
+            // 탭 상태를 URL 해시에 반영 -> 링크 공유 및 브라우저 뒤로가기 지원
+            if (updateHash !== false && window.location.hash !== '#' + tabId) {
+                history.pushState(null, '', '#' + tabId);
+            }
+
+            window.scrollTo(0, 0);
+        }
+
+        function tabIdFromHash() {
+            const id = decodeURIComponent(window.location.hash.replace('#', '')).trim();
+            return TAB_IDS.indexOf(id) !== -1 ? id : null;
+        }
+
+        function syncTabFromHash() {
+            const id = tabIdFromHash() || 'overview';
+            const current = document.querySelector('.page-content.active');
+            if (current && current.id === id) return;
+            showTab(null, id, false);
+        }
+
+        function toggleMobileMenu(event) {
+            if (event) event.stopPropagation();
+            const nav = document.querySelector('.tab-nav');
+            const toggle = document.querySelector('.mobile-menu-toggle');
+            if (!nav || !toggle) return;
+
+            const isOpen = nav.classList.toggle('menu-open');
+            toggle.setAttribute('aria-expanded', String(isOpen));
+        }
+
+        function closeMobileMenu() {
+            const nav = document.querySelector('.tab-nav');
+            const toggle = document.querySelector('.mobile-menu-toggle');
+            if (!nav || !toggle) return;
+
+            nav.classList.remove('menu-open');
+            toggle.setAttribute('aria-expanded', 'false');
+        }
+
+        function updateMobileMenuLabel() {
+            const current = document.getElementById('mobile-menu-current');
+            const activeTab = document.querySelector('.tab-link.active');
+            if (current && activeTab) {
+                current.textContent = activeTab.textContent.trim();
+            }
+        }
+
+        function savedLang() {
+            try {
+                const stored = localStorage.getItem(LANG_KEY);
+                if (stored && translations[stored]) return stored;
+            } catch (e) { /* 시크릿 모드 등에서 접근 불가 */ }
+            return 'ko';
+        }
+
+        function changeLang(btn, lang) {
+            if (!translations[lang]) return;
+            document.querySelectorAll('.lang-btn').forEach(b => b.classList.remove('active'));
+            const target = btn || document.querySelector('.lang-btn[data-lang="' + lang + '"]');
+            if (target) target.classList.add('active');
+            try {
+                localStorage.setItem(LANG_KEY, lang);
+            } catch (e) { /* 저장 실패는 무시 */ }
+            updateLanguage(lang);
+        }
+
+        function updateLanguage(lang) {
+            const langData = translations[lang];
+            if (!langData) return;
+
+            // HTML lang 속성 업데이트
+            document.documentElement.lang = lang;
+
+            for (const id in langData) {
+                const element = document.getElementById(id);
+                if (element) {
+                    element.innerHTML = langData[id];
+                }
+            }
+
+            updateMobileMenuLabel();
+        }
+
+        function openVideoModal() {
+            const modal = document.getElementById('videoModal');
+            if (modal) modal.classList.add('active');
+            const video = document.getElementById('promoVideo');
+            if (video) video.play();
+        }
+
+        function closeVideoModal() {
+            const modal = document.getElementById('videoModal');
+            if (modal) modal.classList.remove('active');
+            const video = document.getElementById('promoVideo');
+            if (video) video.pause();
+        }
+
+        function openInstallModal() {
+            const modal = document.getElementById('installModal');
+            if (modal) modal.classList.add('active');
+            const video = document.getElementById('installVideo');
+            if (video) video.play();
+        }
+
+        function closeInstallModal() {
+            const modal = document.getElementById('installModal');
+            if (modal) modal.classList.remove('active');
+            const video = document.getElementById('installVideo');
+            if (video) video.pause();
+        }
+
+        function openYoutubeModal() {
+            // 유튜브는 임베드한 페이지의 도메인을 확인할 수 없으면 재생을 거부한다(오류 153).
+            // file:// 로 직접 연 경우가 여기에 해당하므로, 이때는 유튜브를 새 탭으로 연다.
+            if (location.protocol !== 'http:' && location.protocol !== 'https:') {
+                window.open('https://youtu.be/' + DRB_VIDEO_ID, '_blank', 'noopener');
+                return;
+            }
+
+            const modal = document.getElementById('youtubeModal');
+            const frame = document.getElementById('youtubeFrame');
+            if (!modal || !frame) return;
+            // src를 열 때 넣고 닫을 때 비운다 -> 첫 로딩 시 유튜브 리소스를 받지 않음
+            frame.src = 'https://www.youtube-nocookie.com/embed/' + DRB_VIDEO_ID + '?autoplay=1&rel=0';
+            modal.classList.add('active');
+        }
+
+        function closeYoutubeModal() {
+            const modal = document.getElementById('youtubeModal');
+            const frame = document.getElementById('youtubeFrame');
+            if (modal) modal.classList.remove('active');
+            if (frame) frame.src = '';
+        }
+
+        window.onload = function() {
+            changeLang(null, savedLang());
+            showTab(null, tabIdFromHash() || 'overview', false);
+
+            window.addEventListener('hashchange', syncTabFromHash);
+            window.addEventListener('popstate', syncTabFromHash);
+
+            document.addEventListener('keydown', function(event) {
+                if (event.key === 'Escape') {
+                    closeVideoModal();
+                    closeInstallModal();
+                    closeYoutubeModal();
+                    closeMobileMenu();
+                }
+            });
+
+            document.addEventListener('click', function(event) {
+                const tabNav = document.querySelector('.tab-nav');
+                if (tabNav && !tabNav.contains(event.target)) {
+                    closeMobileMenu();
+                }
+            });
+        };
+    </script>
+</body>
+
+</html>
